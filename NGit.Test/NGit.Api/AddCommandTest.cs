@@ -52,6 +52,7 @@ using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Util;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit.Api

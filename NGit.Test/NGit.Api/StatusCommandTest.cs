@@ -42,34 +42,36 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 using System.Collections.Generic;
-using NGit;
 using NGit.Api;
+using NGit.Api.Errors;
+using NGit.Errors;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
-namespace NGit.Api
+namespace NGit.Test.NGit.Api
 {
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class StatusCommandTest : RepositoryTestCase
 	{
-		/// <exception cref="NGit.Errors.NoWorkTreeException"></exception>
-		/// <exception cref="NGit.Api.Errors.GitAPIException"></exception>
-		[NUnit.Framework.Test]
+		/// <exception cref="NoWorkTreeException"></exception>
+		/// <exception cref="GitAPIException"></exception>
+		[Test]
 		public virtual void TestEmptyStatus()
 		{
 			Git git = new Git(db);
 			Status stat = git.Status().Call();
-			NUnit.Framework.Assert.AreEqual(0, stat.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetUntracked().Count);
+			Assert.AreEqual(0, stat.GetAdded().Count);
+			Assert.AreEqual(0, stat.GetChanged().Count);
+			Assert.AreEqual(0, stat.GetMissing().Count);
+			Assert.AreEqual(0, stat.GetModified().Count);
+			Assert.AreEqual(0, stat.GetRemoved().Count);
+			Assert.AreEqual(0, stat.GetUntracked().Count);
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		/// <exception cref="NGit.Api.Errors.NoFilepatternException"></exception>
-		/// <exception cref="NGit.Api.Errors.GitAPIException"></exception>
-		[NUnit.Framework.Test]
+		/// <exception cref="NoFilepatternException"></exception>
+		/// <exception cref="GitAPIException"></exception>
+		[Test]
 		public virtual void TestDifferentStates()
 		{
 			Git git = new Git(db);
@@ -78,12 +80,12 @@ namespace NGit.Api
 			WriteTrashFile("c", "content of c");
 			git.Add().AddFilepattern("a").AddFilepattern("b").Call();
 			Status stat = git.Status().Call();
-			NUnit.Framework.Assert.AreEqual(Set("a", "b"), Set (stat.GetAdded()));
-			NUnit.Framework.Assert.AreEqual(0, stat.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(Set("c"), Set (stat.GetUntracked()));
+			Assert.AreEqual(Set("a", "b"), Set (stat.GetAdded()));
+			Assert.AreEqual(0, stat.GetChanged().Count);
+			Assert.AreEqual(0, stat.GetMissing().Count);
+			Assert.AreEqual(0, stat.GetModified().Count);
+			Assert.AreEqual(0, stat.GetRemoved().Count);
+			Assert.AreEqual(Set("c"), Set (stat.GetUntracked()));
 			git.Commit().SetMessage("initial").Call();
 			WriteTrashFile("a", "modified content of a");
 			WriteTrashFile("b", "modified content of b");
@@ -91,33 +93,33 @@ namespace NGit.Api
 			git.Add().AddFilepattern("a").AddFilepattern("d").Call();
 			WriteTrashFile("a", "again modified content of a");
 			stat = git.Status().Call();
-			NUnit.Framework.Assert.AreEqual(Set("d"), Set (stat.GetAdded()));
-			NUnit.Framework.Assert.AreEqual(Set("a"), Set (stat.GetChanged()));
-			NUnit.Framework.Assert.AreEqual(0, stat.GetMissing().Count);
-			NUnit.Framework.CollectionAssert.AreEquivalent(Set("b", "a"), Set (stat.GetModified()));
-			NUnit.Framework.Assert.AreEqual(0, stat.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(Set("c"), Set (stat.GetUntracked()));
+			Assert.AreEqual(Set("d"), Set (stat.GetAdded()));
+			Assert.AreEqual(Set("a"), Set (stat.GetChanged()));
+			Assert.AreEqual(0, stat.GetMissing().Count);
+			CollectionAssert.AreEquivalent(Set("b", "a"), Set (stat.GetModified()));
+			Assert.AreEqual(0, stat.GetRemoved().Count);
+			Assert.AreEqual(Set("c"), Set (stat.GetUntracked()));
 			git.Add().AddFilepattern(".").Call();
 			git.Commit().SetMessage("second").Call();
 			stat = git.Status().Call();
-			NUnit.Framework.Assert.AreEqual(0, stat.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetUntracked().Count);
+			Assert.AreEqual(0, stat.GetAdded().Count);
+			Assert.AreEqual(0, stat.GetChanged().Count);
+			Assert.AreEqual(0, stat.GetMissing().Count);
+			Assert.AreEqual(0, stat.GetModified().Count);
+			Assert.AreEqual(0, stat.GetRemoved().Count);
+			Assert.AreEqual(0, stat.GetUntracked().Count);
 			DeleteTrashFile("a");
-			NUnit.Framework.Assert.IsFalse(new FilePath(git.GetRepository().WorkTree, "a").Exists
+			Assert.IsFalse(new FilePath(git.GetRepository().WorkTree, "a").Exists
 				());
 			git.Add().AddFilepattern("a").SetUpdate(true).Call();
 			WriteTrashFile("a", "recreated content of a");
 			stat = git.Status().Call();
-			NUnit.Framework.Assert.AreEqual(0, stat.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(0, stat.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(Set("a"), Set (stat.GetRemoved()));
-			NUnit.Framework.Assert.AreEqual(Set("a"), Set (stat.GetUntracked()));
+			Assert.AreEqual(0, stat.GetAdded().Count);
+			Assert.AreEqual(0, stat.GetChanged().Count);
+			Assert.AreEqual(0, stat.GetMissing().Count);
+			Assert.AreEqual(0, stat.GetModified().Count);
+			Assert.AreEqual(Set("a"), Set (stat.GetRemoved()));
+			Assert.AreEqual(Set("a"), Set (stat.GetUntracked()));
 			git.Commit().SetMessage("t").Call();
 		}
 

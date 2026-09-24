@@ -43,6 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using NGit;
 using NGit.Storage.File;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit

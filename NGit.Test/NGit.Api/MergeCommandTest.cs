@@ -41,26 +41,25 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-using NGit;
 using NGit.Api;
 using NGit.Api.Errors;
 using NGit.Merge;
 using NGit.Revwalk;
 using NGit.Util;
+using NUnit.Framework.Legacy;
 using Sharpen;
-using NUnit.Framework;
 
-namespace NGit.Api
+namespace NGit.Test.NGit.Api
 {
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class MergeCommandTest : RepositoryTestCase
 	{
-		public static MergeStrategy[] mergeStrategies = MergeStrategy.Get();
+		public static MergeStrategy[] MergeStrategies = MergeStrategy.Get();
 
 		private GitDateFormatter dateFormatter;
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.SetUp]
+		[SetUp]
 		public override void SetUp()
 		{
 			base.SetUp();
@@ -68,23 +67,23 @@ namespace NGit.Api
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeInItself()
 		{
 			Git git = new Git(db);
 			git.Commit().SetMessage("initial commit").Call();
 			MergeCommandResult result = git.Merge().Include(db.GetRef(Constants.HEAD)).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.ALREADY_UP_TO_DATE, result.GetMergeStatus
+			Assert.AreEqual(MergeStatus.ALREADY_UP_TO_DATE, result.GetMergeStatus
 				());
 			// no reflog entry written by merge
-			NUnit.Framework.Assert.AreEqual("commit: initial commit", db.GetReflogReader(Constants
+			Assert.AreEqual("commit: initial commit", db.GetReflogReader(Constants
 				.HEAD).GetLastEntry().GetComment());
-			NUnit.Framework.Assert.AreEqual("commit: initial commit", db.GetReflogReader(db.GetBranch
+			Assert.AreEqual("commit: initial commit", db.GetReflogReader(db.GetBranch
 				()).GetLastEntry().GetComment());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestAlreadyUpToDate()
 		{
 			Git git = new Git(db);
@@ -93,18 +92,18 @@ namespace NGit.Api
 			RevCommit second = git.Commit().SetMessage("second commit").Call();
 			MergeCommandResult result = git.Merge().Include(db.GetRef("refs/heads/branch1")).
 				Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.ALREADY_UP_TO_DATE, result.GetMergeStatus
+			Assert.AreEqual(MergeStatus.ALREADY_UP_TO_DATE, result.GetMergeStatus
 				());
-			NUnit.Framework.Assert.AreEqual(second, result.GetNewHead());
+			Assert.AreEqual(second, result.GetNewHead());
 			// no reflog entry written by merge
-			NUnit.Framework.Assert.AreEqual("commit: second commit", db.GetReflogReader(Constants
+			Assert.AreEqual("commit: second commit", db.GetReflogReader(Constants
 				.HEAD).GetLastEntry().GetComment());
-			NUnit.Framework.Assert.AreEqual("commit: second commit", db.GetReflogReader(db.GetBranch
+			Assert.AreEqual("commit: second commit", db.GetReflogReader(db.GetBranch
 				()).GetLastEntry().GetComment());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFastForward()
 		{
 			Git git = new Git(db);
@@ -114,46 +113,46 @@ namespace NGit.Api
 			CheckoutBranch("refs/heads/branch1");
 			MergeCommandResult result = git.Merge().Include(db.GetRef(Constants.MASTER)).Call
 				();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAST_FORWARD, result.GetMergeStatus()
+			Assert.AreEqual(MergeStatus.FAST_FORWARD, result.GetMergeStatus()
 				);
-			NUnit.Framework.Assert.AreEqual(second, result.GetNewHead());
-			NUnit.Framework.Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
+			Assert.AreEqual(second, result.GetNewHead());
+			Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
 				(Constants.HEAD).GetLastEntry().GetComment());
-			NUnit.Framework.Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
+			Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
 				(db.GetBranch()).GetLastEntry().GetComment());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFastForwardWithFiles()
 		{
 			Git git = new Git(db);
 			WriteTrashFile("file1", "file1");
 			git.Add().AddFilepattern("file1").Call();
 			RevCommit first = git.Commit().SetMessage("initial commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
 			CreateBranch(first, "refs/heads/branch1");
 			WriteTrashFile("file2", "file2");
 			git.Add().AddFilepattern("file2").Call();
 			RevCommit second = git.Commit().SetMessage("second commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
 			CheckoutBranch("refs/heads/branch1");
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "file2").Exists());
 			MergeCommandResult result = git.Merge().Include(db.GetRef(Constants.MASTER)).Call
 				();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAST_FORWARD, result.GetMergeStatus()
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.AreEqual(MergeStatus.FAST_FORWARD, result.GetMergeStatus()
 				);
-			NUnit.Framework.Assert.AreEqual(second, result.GetNewHead());
-			NUnit.Framework.Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
+			Assert.AreEqual(second, result.GetNewHead());
+			Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
 				(Constants.HEAD).GetLastEntry().GetComment());
-			NUnit.Framework.Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
+			Assert.AreEqual("merge refs/heads/master: Fast-forward", db.GetReflogReader
 				(db.GetBranch()).GetLastEntry().GetComment());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMultipleHeads()
 		{
 			Git git = new Git(db);
@@ -168,15 +167,15 @@ namespace NGit.Api
 			git.Add().AddFilepattern("file3").Call();
 			git.Commit().SetMessage("third commit").Call();
 			CheckoutBranch("refs/heads/branch1");
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "file3").Exists());
 			MergeCommand merge = git.Merge();
 			merge.Include(second.Id);
 			merge.Include(db.GetRef(Constants.MASTER));
 			try
 			{
 				merge.Call();
-				NUnit.Framework.Assert.Fail("Expected exception not thrown when merging multiple heads"
+				Assert.Fail("Expected exception not thrown when merging multiple heads"
 					);
 			}
 			catch (InvalidMergeHeadsException)
@@ -201,17 +200,17 @@ namespace NGit.Api
 			git.Commit().SetMessage("third").Call();
 			MergeCommandResult result = git.Merge().SetStrategy(mergeStrategy).Include(db.GetRef
 				(Constants.MASTER)).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("merge refs/heads/master: Merge made by " + mergeStrategy
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual("merge refs/heads/master: Merge made by " + mergeStrategy
 				.GetName() + ".", db.GetReflogReader(Constants.HEAD).GetLastEntry().GetComment()
 				);
-			NUnit.Framework.Assert.AreEqual("merge refs/heads/master: Merge made by " + mergeStrategy
+			Assert.AreEqual("merge refs/heads/master: Merge made by " + mergeStrategy
 				.GetName() + ".", db.GetReflogReader(db.GetBranch()).GetLastEntry().GetComment()
 				);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestContentMerge()
 		{
 			Git git = new Git(db);
@@ -226,10 +225,10 @@ namespace NGit.Api
 			WriteTrashFile("b", "1\nb(side)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("b").Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
 			WriteTrashFile("a", "1\na(main)\n3\n");
 			WriteTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -237,20 +236,20 @@ namespace NGit.Api
 			git.Commit().SetMessage("main").Call();
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\n<<<<<<< HEAD\na(main)\n=======\na(side)\n>>>>>>> 86503e7e397465588cc267b65d778538bffccb83\n3\n"
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual("1\n<<<<<<< HEAD\na(main)\n=======\na(side)\n>>>>>>> 86503e7e397465588cc267b65d778538bffccb83\n3\n"
 				, Read(new FilePath(db.WorkTree, "a")));
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual(1, result.GetConflicts().Count);
-			NUnit.Framework.Assert.AreEqual(3, result.GetConflicts().Get("a")[0].Length);
-			NUnit.Framework.Assert.AreEqual(RepositoryState.MERGING, db.GetRepositoryState());
+			Assert.AreEqual(1, result.GetConflicts().Count);
+			Assert.AreEqual(3, result.GetConflicts().Get("a")[0].Length);
+			Assert.AreEqual(RepositoryState.MERGING, db.GetRepositoryState());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeMessage()
 		{
 			Git git = new Git(db);
@@ -268,12 +267,12 @@ namespace NGit.Api
 			git.Commit().SetMessage("main").Call();
 			Ref sideBranch = db.GetRef("side");
 			git.Merge().Include(sideBranch).SetStrategy(MergeStrategy.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual("Merge branch 'side'\n\nConflicts:\n\ta\n", db.ReadMergeCommitMsg
+			Assert.AreEqual("Merge branch 'side'\n\nConflicts:\n\ta\n", db.ReadMergeCommitMsg
 				());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeNonVersionedPaths()
 		{
 			Git git = new Git(db);
@@ -288,37 +287,37 @@ namespace NGit.Api
 			WriteTrashFile("b", "1\nb(side)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("b").Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
 			WriteTrashFile("a", "1\na(main)\n3\n");
 			WriteTrashFile("c/c/c", "1\nc(main)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("c/c/c").Call();
 			git.Commit().SetMessage("main").Call();
 			WriteTrashFile("d", "1\nd\n3\n");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "e").Mkdir());
+			Assert.IsTrue(new FilePath(db.WorkTree, "e").Mkdir());
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\n<<<<<<< HEAD\na(main)\n=======\na(side)\n>>>>>>> 86503e7e397465588cc267b65d778538bffccb83\n3\n"
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual("1\n<<<<<<< HEAD\na(main)\n=======\na(side)\n>>>>>>> 86503e7e397465588cc267b65d778538bffccb83\n3\n"
 				, Read(new FilePath(db.WorkTree, "a")));
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
+			Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
 				);
 			FilePath dir = new FilePath(db.WorkTree, "e");
-			NUnit.Framework.Assert.IsTrue(dir.IsDirectory());
-			NUnit.Framework.Assert.AreEqual(1, result.GetConflicts().Count);
-			NUnit.Framework.Assert.AreEqual(3, result.GetConflicts().Get("a")[0].Length);
-			NUnit.Framework.Assert.AreEqual(RepositoryState.MERGING, db.GetRepositoryState());
+			Assert.IsTrue(dir.IsDirectory());
+			Assert.AreEqual(1, result.GetConflicts().Count);
+			Assert.AreEqual(3, result.GetConflicts().Get("a")[0].Length);
+			Assert.AreEqual(RepositoryState.MERGING, db.GetRepositoryState());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMultipleCreations()
 		{
 			Git git = new Git(db);
@@ -336,11 +335,11 @@ namespace NGit.Api
 			git.Commit().SetMessage("main").Call();
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMultipleCreationsSameContent()
 		{
 			Git git = new Git(db);
@@ -358,17 +357,17 @@ namespace NGit.Api
 			git.Commit().SetMessage("main").Call();
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\nb(1)\n3\n", Read(new FilePath(db.WorkTree, "b"
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual("1\nb(1)\n3\n", Read(new FilePath(db.WorkTree, "b"
 				)));
-			NUnit.Framework.Assert.AreEqual("merge " + secondCommit.Id.GetName() + ": Merge made by resolve."
+			Assert.AreEqual("merge " + secondCommit.Id.GetName() + ": Merge made by resolve."
 				, db.GetReflogReader(Constants.HEAD).GetLastEntry().GetComment());
-			NUnit.Framework.Assert.AreEqual("merge " + secondCommit.Id.GetName() + ": Merge made by resolve."
+			Assert.AreEqual("merge " + secondCommit.Id.GetName() + ": Merge made by resolve."
 				, db.GetReflogReader(db.GetBranch()).GetLastEntry().GetComment());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSuccessfulContentMerge()
 		{
 			Git git = new Git(db);
@@ -383,10 +382,10 @@ namespace NGit.Api
 			WriteTrashFile("b", "1\nb(side)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("b").Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
 			WriteTrashFile("a", "1\na\n3(main)\n");
 			WriteTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -394,32 +393,32 @@ namespace NGit.Api
 			RevCommit thirdCommit = git.Commit().SetMessage("main").Call();
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1(side)\na\n3(main)\n", Read(new FilePath(db.WorkTree
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual("1(side)\na\n3(main)\n", Read(new FilePath(db.WorkTree
 				, "a")));
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual(null, result.GetConflicts());
-			NUnit.Framework.Assert.AreEqual(2, result.GetMergedCommits().Length);
-			NUnit.Framework.Assert.AreEqual(thirdCommit, result.GetMergedCommits()[0]);
-			NUnit.Framework.Assert.AreEqual(secondCommit, result.GetMergedCommits()[1]);
+			Assert.AreEqual(null, result.GetConflicts());
+			Assert.AreEqual(2, result.GetMergedCommits().Length);
+			Assert.AreEqual(thirdCommit, result.GetMergedCommits()[0]);
+			Assert.AreEqual(secondCommit, result.GetMergedCommits()[1]);
 			Iterator<RevCommit> it = git.Log().Call().Iterator();
 			RevCommit newHead = it.Next();
-			NUnit.Framework.Assert.AreEqual(newHead, result.GetNewHead());
-			NUnit.Framework.Assert.AreEqual(2, newHead.ParentCount);
-			NUnit.Framework.Assert.AreEqual(thirdCommit, newHead.GetParent(0));
-			NUnit.Framework.Assert.AreEqual(secondCommit, newHead.GetParent(1));
-			NUnit.Framework.Assert.AreEqual("Merge commit '3fa334456d236a92db020289fe0bf481d91777b4'"
+			Assert.AreEqual(newHead, result.GetNewHead());
+			Assert.AreEqual(2, newHead.ParentCount);
+			Assert.AreEqual(thirdCommit, newHead.GetParent(0));
+			Assert.AreEqual(secondCommit, newHead.GetParent(1));
+			Assert.AreEqual("Merge commit '3fa334456d236a92db020289fe0bf481d91777b4'"
 				, newHead.GetFullMessage());
 			// @TODO fix me
-			NUnit.Framework.Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
+			Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
 		}
 
 		// test index state
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSuccessfulContentMergeAndDirtyworkingTree()
 		{
 			Git git = new Git(db);
@@ -436,10 +435,10 @@ namespace NGit.Api
 			WriteTrashFile("b", "1\nb(side)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("b").Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
 			WriteTrashFile("a", "1\na\n3(main)\n");
 			WriteTrashFile("c/c/c", "1\nc(main)\n3\n");
@@ -448,32 +447,32 @@ namespace NGit.Api
 			WriteTrashFile("d", "--- dirty ---");
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1(side)\na\n3(main)\n", Read(new FilePath(db.WorkTree
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual("1(side)\na\n3(main)\n", Read(new FilePath(db.WorkTree
 				, "a")));
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual("--- dirty ---", Read(new FilePath(db.WorkTree, "d"
+			Assert.AreEqual("--- dirty ---", Read(new FilePath(db.WorkTree, "d"
 				)));
-			NUnit.Framework.Assert.AreEqual(null, result.GetConflicts());
-			NUnit.Framework.Assert.AreEqual(2, result.GetMergedCommits().Length);
-			NUnit.Framework.Assert.AreEqual(thirdCommit, result.GetMergedCommits()[0]);
-			NUnit.Framework.Assert.AreEqual(secondCommit, result.GetMergedCommits()[1]);
+			Assert.AreEqual(null, result.GetConflicts());
+			Assert.AreEqual(2, result.GetMergedCommits().Length);
+			Assert.AreEqual(thirdCommit, result.GetMergedCommits()[0]);
+			Assert.AreEqual(secondCommit, result.GetMergedCommits()[1]);
 			Iterator<RevCommit> it = git.Log().Call().Iterator();
 			RevCommit newHead = it.Next();
-			NUnit.Framework.Assert.AreEqual(newHead, result.GetNewHead());
-			NUnit.Framework.Assert.AreEqual(2, newHead.ParentCount);
-			NUnit.Framework.Assert.AreEqual(thirdCommit, newHead.GetParent(0));
-			NUnit.Framework.Assert.AreEqual(secondCommit, newHead.GetParent(1));
-			NUnit.Framework.Assert.AreEqual("Merge commit '064d54d98a4cdb0fed1802a21c656bfda67fe879'"
+			Assert.AreEqual(newHead, result.GetNewHead());
+			Assert.AreEqual(2, newHead.ParentCount);
+			Assert.AreEqual(thirdCommit, newHead.GetParent(0));
+			Assert.AreEqual(secondCommit, newHead.GetParent(1));
+			Assert.AreEqual("Merge commit '064d54d98a4cdb0fed1802a21c656bfda67fe879'"
 				, newHead.GetFullMessage());
-			NUnit.Framework.Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
+			Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSingleDeletion()
 		{
 			Git git = new Git(db);
@@ -486,12 +485,12 @@ namespace NGit.Api
 			RevCommit initialCommit = git.Commit().SetMessage("initial").Call();
 			CreateBranch(initialCommit, "refs/heads/side");
 			CheckoutBranch("refs/heads/side");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "b").Delete());
+			Assert.IsTrue(new FilePath(db.WorkTree, "b").Delete());
 			git.Add().AddFilepattern("b").SetUpdate(true).Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "b").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "b").Exists());
 			WriteTrashFile("a", "1\na\n3(main)\n");
 			WriteTrashFile("c/c/c", "1\nc(main)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("c/c/c").Call();
@@ -499,32 +498,32 @@ namespace NGit.Api
 			// We are merging a deletion into our branch
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\na\n3(main)\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual("1\na\n3(main)\n", Read(new FilePath(db.WorkTree, 
 				"a")));
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
+			Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
 				);
 			// Do the opposite, be on a branch where we have deleted a file and
 			// merge in a old commit where this file was not deleted
 			CheckoutBranch("refs/heads/side");
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
 			result = git.Merge().Include(thirdCommit.Id).SetStrategy(MergeStrategy.RESOLVE).Call
 				();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\na\n3(main)\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual("1\na\n3(main)\n", Read(new FilePath(db.WorkTree, 
 				"a")));
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
+			Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
 				);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMultipleDeletions()
 		{
 			Git git = new Git(db);
@@ -533,23 +532,23 @@ namespace NGit.Api
 			RevCommit initialCommit = git.Commit().SetMessage("initial").Call();
 			CreateBranch(initialCommit, "refs/heads/side");
 			CheckoutBranch("refs/heads/side");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "a").Delete());
+			Assert.IsTrue(new FilePath(db.WorkTree, "a").Delete());
 			git.Add().AddFilepattern("a").SetUpdate(true).Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "a").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "a").Exists());
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "a").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "a").Delete());
+			Assert.IsTrue(new FilePath(db.WorkTree, "a").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "a").Delete());
 			git.Add().AddFilepattern("a").SetUpdate(true).Call();
 			git.Commit().SetMessage("main").Call();
 			// We are merging a deletion into our branch
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDeletionAndConflict()
 		{
 			Git git = new Git(db);
@@ -562,14 +561,14 @@ namespace NGit.Api
 			RevCommit initialCommit = git.Commit().SetMessage("initial").Call();
 			CreateBranch(initialCommit, "refs/heads/side");
 			CheckoutBranch("refs/heads/side");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "b").Delete());
+			Assert.IsTrue(new FilePath(db.WorkTree, "b").Delete());
 			WriteTrashFile("a", "1\na\n3(side)\n");
 			git.Add().AddFilepattern("b").SetUpdate(true).Call();
 			git.Add().AddFilepattern("a").SetUpdate(true).Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "b").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "b").Exists());
 			WriteTrashFile("a", "1\na\n3(main)\n");
 			WriteTrashFile("c/c/c", "1\nc(main)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("c/c/c").Call();
@@ -577,18 +576,18 @@ namespace NGit.Api
 			// We are merging a deletion into our branch
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\na\n<<<<<<< HEAD\n3(main)\n=======\n3(side)\n>>>>>>> 54ffed45d62d252715fc20e41da92d44c48fb0ff\n"
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual("1\na\n<<<<<<< HEAD\n3(main)\n=======\n3(side)\n>>>>>>> 54ffed45d62d252715fc20e41da92d44c48fb0ff\n"
 				, Read(new FilePath(db.WorkTree, "a")));
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c/c/c")));
-			NUnit.Framework.Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
+			Assert.AreEqual("1\nd\n3\n", Read(new FilePath(db.WorkTree, "d"))
 				);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDeletionOnMasterConflict()
 		{
 			Git git = new Git(db);
@@ -609,17 +608,17 @@ namespace NGit.Api
 			// merge side with master
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
 			// result should be 'a' conflicting with workspace content from side
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "a").Exists());
-			NUnit.Framework.Assert.AreEqual("1\na(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.IsTrue(new FilePath(db.WorkTree, "a").Exists());
+			Assert.AreEqual("1\na(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"a")));
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDeletionOnSideConflict()
 		{
 			Git git = new Git(db);
@@ -640,18 +639,18 @@ namespace NGit.Api
 			// merge side with master
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "a").Exists());
-			NUnit.Framework.Assert.AreEqual("1\na(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.IsTrue(new FilePath(db.WorkTree, "a").Exists());
+			Assert.AreEqual("1\na(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"a")));
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
-			NUnit.Framework.Assert.AreEqual(1, result.GetConflicts().Count);
-			NUnit.Framework.Assert.AreEqual(3, result.GetConflicts().Get("a")[0].Length);
+			Assert.AreEqual(1, result.GetConflicts().Count);
+			Assert.AreEqual(3, result.GetConflicts().Get("a")[0].Length);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestModifiedAndRenamed()
 		{
 			// this test is essentially the same as testDeletionOnSideConflict,
@@ -675,17 +674,17 @@ namespace NGit.Api
 			RevCommit d2Commit = git.Commit().SetMessage("d2 change in x").Call();
 			CheckoutBranch("refs/heads/master");
 			MergeCommandResult d1Merge = git.Merge().Include(d1Commit).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAST_FORWARD, d1Merge.GetMergeStatus(
+			Assert.AreEqual(MergeStatus.FAST_FORWARD, d1Merge.GetMergeStatus(
 				));
 			MergeCommandResult d2Merge = git.Merge().Include(d2Commit).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, d2Merge.GetMergeStatus()
+			Assert.AreEqual(MergeStatus.CONFLICTING, d2Merge.GetMergeStatus()
 				);
-			NUnit.Framework.Assert.AreEqual(1, d2Merge.GetConflicts().Count);
-			NUnit.Framework.Assert.AreEqual(3, d2Merge.GetConflicts().Get("x")[0].Length);
+			Assert.AreEqual(1, d2Merge.GetConflicts().Count);
+			Assert.AreEqual(3, d2Merge.GetConflicts().Get("x")[0].Length);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeFailingWithDirtyWorkingTree()
 		{
 			Git git = new Git(db);
@@ -699,10 +698,10 @@ namespace NGit.Api
 			WriteTrashFile("b", "1\nb(side)\n3\n");
 			git.Add().AddFilepattern("a").AddFilepattern("b").Call();
 			RevCommit secondCommit = git.Commit().SetMessage("side").Call();
-			NUnit.Framework.Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nb(side)\n3\n", Read(new FilePath(db.WorkTree, 
 				"b")));
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
 			WriteTrashFile("a", "1\na\n3(main)\n");
 			git.Add().AddFilepattern("a").Call();
@@ -710,17 +709,17 @@ namespace NGit.Api
 			WriteTrashFile("a", "--- dirty ---");
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAILED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("--- dirty ---", Read(new FilePath(db.WorkTree, "a"
+			Assert.AreEqual(MergeStatus.FAILED, result.GetMergeStatus());
+			Assert.AreEqual("--- dirty ---", Read(new FilePath(db.WorkTree, "a"
 				)));
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
-			NUnit.Framework.Assert.AreEqual(null, result.GetConflicts());
-			NUnit.Framework.Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
+			Assert.AreEqual(null, result.GetConflicts());
+			Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeConflictFileFolder()
 		{
 			Git git = new Git(db);
@@ -741,21 +740,21 @@ namespace NGit.Api
 			git.Commit().SetMessage("main").Call();
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("1\na\n3\n", Read(new FilePath(db.WorkTree, "a"))
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual("1\na\n3\n", Read(new FilePath(db.WorkTree, "a"))
 				);
-			NUnit.Framework.Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
+			Assert.AreEqual("1\nb\n3\n", Read(new FilePath(db.WorkTree, "b"))
 				);
-			NUnit.Framework.Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nc(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"c")));
-			NUnit.Framework.Assert.AreEqual("1\nd(main)\n3\n", Read(new FilePath(db.WorkTree, 
+			Assert.AreEqual("1\nd(main)\n3\n", Read(new FilePath(db.WorkTree, 
 				"d/d/d")));
-			NUnit.Framework.Assert.AreEqual(null, result.GetConflicts());
-			NUnit.Framework.Assert.AreEqual(RepositoryState.MERGING, db.GetRepositoryState());
+			Assert.AreEqual(null, result.GetConflicts());
+			Assert.AreEqual(RepositoryState.MERGING, db.GetRepositoryState());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSuccessfulMergeFailsDueToDirtyIndex()
 		{
 			Git git = new Git(db);
@@ -786,7 +785,7 @@ namespace NGit.Api
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestConflictingMergeFailsDueToDirtyIndex()
 		{
 			Git git = new Git(db);
@@ -819,7 +818,7 @@ namespace NGit.Api
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSuccessfulMergeFailsDueToDirtyWorktree()
 		{
 			Git git = new Git(db);
@@ -849,7 +848,7 @@ namespace NGit.Api
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestConflictingMergeFailsDueToDirtyWorktree()
 		{
 			Git git = new Git(db);
@@ -881,7 +880,7 @@ namespace NGit.Api
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeRemovingFolders()
 		{
 			FilePath folder1 = new FilePath(db.WorkTree, "folder1");
@@ -909,15 +908,15 @@ namespace NGit.Api
 			git.Checkout().SetName(commit1.Name).Call();
 			MergeCommandResult result = git.Merge().Include(commit2.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAST_FORWARD, result.GetMergeStatus()
+			Assert.AreEqual(MergeStatus.FAST_FORWARD, result.GetMergeStatus()
 				);
-			NUnit.Framework.Assert.AreEqual(commit2, result.GetNewHead());
-			NUnit.Framework.Assert.IsFalse(folder1.Exists());
-			NUnit.Framework.Assert.IsFalse(folder2.Exists());
+			Assert.AreEqual(commit2, result.GetNewHead());
+			Assert.IsFalse(folder1.Exists());
+			Assert.IsFalse(folder2.Exists());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestMergeRemovingFoldersWithoutFastForward()
 		{
 			FilePath folder1 = new FilePath(db.WorkTree, "folder1");
@@ -948,12 +947,12 @@ namespace NGit.Api
 			git.Commit().SetMessage("adding another file").Call();
 			MergeCommandResult result = git.Merge().Include(other.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
-			NUnit.Framework.Assert.IsFalse(folder1.Exists());
+			Assert.AreEqual(MergeStatus.MERGED, result.GetMergeStatus());
+			Assert.IsFalse(folder1.Exists());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFileModeMerge()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -978,7 +977,7 @@ namespace NGit.Api
 			CreateBranch(initialCommit, "refs/heads/side2");
 			CheckoutBranch("refs/heads/side2");
 			SetExecutable(git, "mergeableMode", false);
-			NUnit.Framework.Assert.IsFalse(new FilePath(git.GetRepository().WorkTree, "conflictingModeNoBase"
+			Assert.IsFalse(new FilePath(git.GetRepository().WorkTree, "conflictingModeNoBase"
 				).Exists());
 			WriteTrashFile("conflictingModeNoBase", "b");
 			SetExecutable(git, "conflictingModeNoBase", false);
@@ -986,13 +985,13 @@ namespace NGit.Api
 			// merge
 			MergeCommandResult result = git.Merge().Include(sideCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.IsTrue(CanExecute(git, "mergeableMode"));
-			NUnit.Framework.Assert.IsFalse(CanExecute(git, "conflictingModeNoBase"));
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.IsTrue(CanExecute(git, "mergeableMode"));
+			Assert.IsFalse(CanExecute(git, "conflictingModeNoBase"));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFileModeMergeWithDirtyWorkTree()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -1018,135 +1017,135 @@ namespace NGit.Api
 			// merge
 			MergeCommandResult result = git.Merge().Include(sideCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAILED, result.GetMergeStatus());
-			NUnit.Framework.Assert.IsFalse(CanExecute(git, "mergeableButDirty"));
+			Assert.AreEqual(MergeStatus.FAILED, result.GetMergeStatus());
+			Assert.IsFalse(CanExecute(git, "mergeableButDirty"));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSquashFastForward()
 		{
 			Git git = new Git(db);
 			WriteTrashFile("file1", "file1");
 			git.Add().AddFilepattern("file1").Call();
 			RevCommit first = git.Commit().SetMessage("initial commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
 			CreateBranch(first, "refs/heads/branch1");
 			CheckoutBranch("refs/heads/branch1");
 			WriteTrashFile("file2", "file2");
 			git.Add().AddFilepattern("file2").Call();
 			RevCommit second = git.Commit().SetMessage("second commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
 			WriteTrashFile("file3", "file3");
 			git.Add().AddFilepattern("file3").Call();
 			RevCommit third = git.Commit().SetMessage("third commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "file3").Exists());
 			MergeCommandResult result = git.Merge().Include(db.GetRef("branch1")).SetSquash(true
 				).Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAST_FORWARD_SQUASHED, result.GetMergeStatus
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.AreEqual(MergeStatus.FAST_FORWARD_SQUASHED, result.GetMergeStatus
 				());
-			NUnit.Framework.Assert.AreEqual(first, result.GetNewHead());
+			Assert.AreEqual(first, result.GetNewHead());
 			// HEAD didn't move
-			NUnit.Framework.Assert.AreEqual(first, db.Resolve(Constants.HEAD + "^{commit}"));
-			NUnit.Framework.Assert.AreEqual("Squashed commit of the following:\n\ncommit " + 
+			Assert.AreEqual(first, db.Resolve(Constants.HEAD + "^{commit}"));
+			Assert.AreEqual("Squashed commit of the following:\n\ncommit " + 
 				third.GetName() + "\nAuthor: " + third.GetAuthorIdent().GetName() + " <" + third
 				.GetAuthorIdent().GetEmailAddress() + ">\nDate:   " + dateFormatter.FormatDate(third
 				.GetAuthorIdent()) + "\n\n\tthird commit\n\ncommit " + second.GetName() + "\nAuthor: "
 				 + second.GetAuthorIdent().GetName() + " <" + second.GetAuthorIdent().GetEmailAddress
 				() + ">\nDate:   " + dateFormatter.FormatDate(second.GetAuthorIdent()) + "\n\n\tsecond commit\n"
 				, db.ReadSquashCommitMsg());
-			NUnit.Framework.Assert.IsNull(db.ReadMergeCommitMsg());
+			Assert.IsNull(db.ReadMergeCommitMsg());
 			Status stat = git.Status().Call();
-			NUnit.Framework.CollectionAssert.AreEquivalent(StatusCommandTest.Set(new [] { "file2", "file3" }), stat.GetAdded
+			CollectionAssert.AreEquivalent(StatusCommandTest.Set(new [] { "file2", "file3" }), stat.GetAdded
 				());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSquashMerge()
 		{
 			Git git = new Git(db);
 			WriteTrashFile("file1", "file1");
 			git.Add().AddFilepattern("file1").Call();
 			RevCommit first = git.Commit().SetMessage("initial commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
 			CreateBranch(first, "refs/heads/branch1");
 			WriteTrashFile("file2", "file2");
 			git.Add().AddFilepattern("file2").Call();
 			RevCommit second = git.Commit().SetMessage("second commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
 			CheckoutBranch("refs/heads/branch1");
 			WriteTrashFile("file3", "file3");
 			git.Add().AddFilepattern("file3").Call();
 			RevCommit third = git.Commit().SetMessage("third commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsFalse(new FilePath(db.WorkTree, "file3").Exists());
 			MergeCommandResult result = git.Merge().Include(db.GetRef("branch1")).SetSquash(true
 				).Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
-			NUnit.Framework.Assert.AreEqual(MergeStatus.MERGED_SQUASHED, result.GetMergeStatus
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file3").Exists());
+			Assert.AreEqual(MergeStatus.MERGED_SQUASHED, result.GetMergeStatus
 				());
-			NUnit.Framework.Assert.AreEqual(second, result.GetNewHead());
+			Assert.AreEqual(second, result.GetNewHead());
 			// HEAD didn't move
-			NUnit.Framework.Assert.AreEqual(second, db.Resolve(Constants.HEAD + "^{commit}"));
-			NUnit.Framework.Assert.AreEqual("Squashed commit of the following:\n\ncommit " + 
+			Assert.AreEqual(second, db.Resolve(Constants.HEAD + "^{commit}"));
+			Assert.AreEqual("Squashed commit of the following:\n\ncommit " + 
 				third.GetName() + "\nAuthor: " + third.GetAuthorIdent().GetName() + " <" + third
 				.GetAuthorIdent().GetEmailAddress() + ">\nDate:   " + dateFormatter.FormatDate(third
 				.GetAuthorIdent()) + "\n\n\tthird commit\n", db.ReadSquashCommitMsg());
-			NUnit.Framework.Assert.IsNull(db.ReadMergeCommitMsg());
+			Assert.IsNull(db.ReadMergeCommitMsg());
 			Status stat = git.Status().Call();
-			NUnit.Framework.CollectionAssert.AreEquivalent(StatusCommandTest.Set("file3"), stat.GetAdded());
+			CollectionAssert.AreEquivalent(StatusCommandTest.Set("file3"), stat.GetAdded());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestSquashMergeConflict()
 		{
 			Git git = new Git(db);
 			WriteTrashFile("file1", "file1");
 			git.Add().AddFilepattern("file1").Call();
 			RevCommit first = git.Commit().SetMessage("initial commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
 			CreateBranch(first, "refs/heads/branch1");
 			WriteTrashFile("file2", "master");
 			git.Add().AddFilepattern("file2").Call();
 			RevCommit second = git.Commit().SetMessage("second commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
 			CheckoutBranch("refs/heads/branch1");
 			WriteTrashFile("file2", "branch");
 			git.Add().AddFilepattern("file2").Call();
 			RevCommit third = git.Commit().SetMessage("third commit").Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
 			CheckoutBranch("refs/heads/master");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
 			MergeCommandResult result = git.Merge().Include(db.GetRef("branch1")).SetSquash(true
 				).Call();
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
-			NUnit.Framework.Assert.IsNull(result.GetNewHead());
-			NUnit.Framework.Assert.AreEqual(second, db.Resolve(Constants.HEAD + "^{commit}"));
-			NUnit.Framework.Assert.AreEqual("Squashed commit of the following:\n\ncommit " + 
+			Assert.IsTrue(new FilePath(db.WorkTree, "file1").Exists());
+			Assert.IsTrue(new FilePath(db.WorkTree, "file2").Exists());
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.IsNull(result.GetNewHead());
+			Assert.AreEqual(second, db.Resolve(Constants.HEAD + "^{commit}"));
+			Assert.AreEqual("Squashed commit of the following:\n\ncommit " + 
 				third.GetName() + "\nAuthor: " + third.GetAuthorIdent().GetName() + " <" + third
 				.GetAuthorIdent().GetEmailAddress() + ">\nDate:   " + dateFormatter.FormatDate(third
 				.GetAuthorIdent()) + "\n\n\tthird commit\n", db.ReadSquashCommitMsg());
-			NUnit.Framework.Assert.AreEqual("\nConflicts:\n\tfile2\n", db.ReadMergeCommitMsg(
+			Assert.AreEqual("\nConflicts:\n\tfile2\n", db.ReadMergeCommitMsg(
 				));
 			Status stat = git.Status().Call();
-			NUnit.Framework.CollectionAssert.AreEquivalent(StatusCommandTest.Set("file2"), stat.GetConflicting
+			CollectionAssert.AreEquivalent(StatusCommandTest.Set("file2"), stat.GetConflicting
 				());
 		}
 
@@ -1172,14 +1171,14 @@ namespace NGit.Api
 		private void CheckMergeFailedResult(MergeCommandResult result, ResolveMerger.MergeFailureReason
 			 reason, string indexState, FilePath fileA)
 		{
-			NUnit.Framework.Assert.AreEqual(MergeStatus.FAILED, result.GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual(reason, result.GetFailingPaths().Get("a"));
-			NUnit.Framework.Assert.AreEqual("a(modified)", Read(fileA));
-			NUnit.Framework.Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
-			NUnit.Framework.Assert.AreEqual("c", Read(new FilePath(db.WorkTree, "c")));
-			NUnit.Framework.Assert.AreEqual(indexState, IndexState(CONTENT));
-			NUnit.Framework.Assert.AreEqual(null, result.GetConflicts());
-			NUnit.Framework.Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
+			Assert.AreEqual(MergeStatus.FAILED, result.GetMergeStatus());
+			Assert.AreEqual(reason, result.GetFailingPaths().Get("a"));
+			Assert.AreEqual("a(modified)", Read(fileA));
+			Assert.IsFalse(new FilePath(db.WorkTree, "b").Exists());
+			Assert.AreEqual("c", Read(new FilePath(db.WorkTree, "c")));
+			Assert.AreEqual(indexState, IndexState(CONTENT));
+			Assert.AreEqual(null, result.GetConflicts());
+			Assert.AreEqual(RepositoryState.SAFE, db.GetRepositoryState());
 		}
 	}
 }

@@ -43,6 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System.Collections.Generic;
 using NGit;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit

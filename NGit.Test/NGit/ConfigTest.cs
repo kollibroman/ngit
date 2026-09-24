@@ -47,6 +47,7 @@ using NGit;
 using NGit.Junit;
 using NGit.Util;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
 namespace NGit

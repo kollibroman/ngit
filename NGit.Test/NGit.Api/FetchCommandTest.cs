@@ -41,11 +41,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-using NGit;
-using NGit.Api;
 using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Transport;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit.Api

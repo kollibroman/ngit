@@ -49,6 +49,7 @@ using NGit.Storage.Pack;
 using NGit.Util;
 using NUnit.Framework;
 using Sharpen;
+using Assert = NUnit.Framework.Assert;
 
 namespace NGit.Storage.Pack
 {

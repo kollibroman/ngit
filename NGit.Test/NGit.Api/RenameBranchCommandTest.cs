@@ -41,19 +41,18 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-using NGit;
 using NGit.Api;
 using NGit.Revwalk;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
-namespace NGit.Api
+namespace NGit.Test.NGit.Api
 {
 	/// <summary>
 	/// Unit tests of
 	/// <see cref="RenameBranchCommand">RenameBranchCommand</see>
 	/// </summary>
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class RenameBranchCommandTest : RepositoryTestCase
 	{
 		private static readonly string PATH = "file.txt";
@@ -63,7 +62,7 @@ namespace NGit.Api
 		private Git git;
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.SetUp]
+		[SetUp]
 		public override void SetUp()
 		{
 			base.SetUp();
@@ -71,29 +70,29 @@ namespace NGit.Api
 			WriteTrashFile(PATH, "content");
 			git.Add().AddFilepattern(PATH).Call();
 			head = git.Commit().SetMessage("add file").Call();
-			NUnit.Framework.Assert.IsNotNull(head);
+			Assert.IsNotNull(head);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void RenameBranchNoConfigValues()
 		{
 			StoredConfig config = git.GetRepository().GetConfig();
 			config.UnsetSection(ConfigConstants.CONFIG_BRANCH_SECTION, Constants.MASTER);
 			config.Save();
 			string branch = "b1";
-			NUnit.Framework.Assert.IsTrue(config.GetNames(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetNames(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER).IsEmpty());
-			NUnit.Framework.Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
+			Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
 			config = git.GetRepository().GetConfig();
-			NUnit.Framework.Assert.IsTrue(config.GetNames(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetNames(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER).IsEmpty());
-			NUnit.Framework.Assert.IsTrue(config.GetNames(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetNames(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch).IsEmpty());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void RenameBranchSingleConfigValue()
 		{
 			StoredConfig config = git.GetRepository().GetConfig();
@@ -101,20 +100,20 @@ namespace NGit.Api
 				.CONFIG_KEY_REBASE, true);
 			config.Save();
 			string branch = "b1";
-			NUnit.Framework.Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER, ConfigConstants.CONFIG_KEY_REBASE, true));
-			NUnit.Framework.Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch, ConfigConstants.CONFIG_KEY_REBASE, false));
-			NUnit.Framework.Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
+			Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
 			config = git.GetRepository().GetConfig();
-			NUnit.Framework.Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER, ConfigConstants.CONFIG_KEY_REBASE, false));
-			NUnit.Framework.Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch, ConfigConstants.CONFIG_KEY_REBASE, false));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void RenameBranchExistingSection()
 		{
 			string branch = "b1";
@@ -125,14 +124,14 @@ namespace NGit.Api
 				);
 			config.SetString(ConfigConstants.CONFIG_BRANCH_SECTION, branch, "a", "b");
 			config.Save();
-			NUnit.Framework.Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
+			Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
 			config = git.GetRepository().GetConfig();
 			CollectionAssert.AreEquivalent(new string[] { "b", "a" }, config.GetStringList(ConfigConstants
 				.CONFIG_BRANCH_SECTION, branch, "a"));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void RenameBranchMultipleConfigValues()
 		{
 			StoredConfig config = git.GetRepository().GetConfig();
@@ -142,23 +141,23 @@ namespace NGit.Api
 				.CONFIG_KEY_MERGE, true);
 			config.Save();
 			string branch = "b1";
-			NUnit.Framework.Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER, ConfigConstants.CONFIG_KEY_REBASE, true));
-			NUnit.Framework.Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch, ConfigConstants.CONFIG_KEY_REBASE, false));
-			NUnit.Framework.Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER, ConfigConstants.CONFIG_KEY_MERGE, true));
-			NUnit.Framework.Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch, ConfigConstants.CONFIG_KEY_MERGE, false));
-			NUnit.Framework.Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
+			Assert.IsNotNull(git.BranchRename().SetNewName(branch).Call());
 			config = git.GetRepository().GetConfig();
-			NUnit.Framework.Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER, ConfigConstants.CONFIG_KEY_REBASE, false));
-			NUnit.Framework.Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch, ConfigConstants.CONFIG_KEY_REBASE, false));
-			NUnit.Framework.Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsFalse(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, Constants.MASTER, ConfigConstants.CONFIG_KEY_MERGE, false));
-			NUnit.Framework.Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
+			Assert.IsTrue(config.GetBoolean(ConfigConstants.CONFIG_BRANCH_SECTION
 				, branch, ConfigConstants.CONFIG_KEY_MERGE, false));
 		}
 	}

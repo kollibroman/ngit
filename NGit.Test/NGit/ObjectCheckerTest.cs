@@ -45,6 +45,7 @@ using System.Text;
 using NGit;
 using NGit.Errors;
 using NGit.Internal;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit

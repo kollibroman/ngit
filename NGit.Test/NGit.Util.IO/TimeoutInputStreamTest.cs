@@ -46,6 +46,7 @@ using System.Threading;
 using NGit.Util;
 using NGit.Util.IO;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
 namespace NGit.Util.IO

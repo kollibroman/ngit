@@ -50,15 +50,16 @@ using NGit.Storage.Pack;
 using NGit.Util;
 using NGit.Util.IO;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
 namespace NGit.Storage.File
 {
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class ConcurrentRepackTest : RepositoryTestCase
 	{
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.SetUp]
+		[SetUp]
 		public override void SetUp()
 		{
 			WindowCacheConfig windowCacheConfig = new WindowCacheConfig();
@@ -68,7 +69,7 @@ namespace NGit.Storage.File
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.TearDown]
+		[TearDown]
 		public override void TearDown()
 		{
 			base.TearDown();
@@ -78,7 +79,7 @@ namespace NGit.Storage.File
 
 		/// <exception cref="NGit.Errors.IncorrectObjectTypeException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestObjectInNewPack()
 		{
 			// Create a new object in a new pack, and test that it is present.
@@ -86,12 +87,12 @@ namespace NGit.Storage.File
 			Repository eden = CreateBareRepository();
 			RevObject o1 = WriteBlob(eden, "o1");
 			Pack(eden, o1);
-			NUnit.Framework.Assert.AreEqual(o1.Name, Parse(o1).Name);
+			Assert.AreEqual(o1.Name, Parse(o1).Name);
 		}
 
 		/// <exception cref="NGit.Errors.IncorrectObjectTypeException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestObjectMovedToNewPack1()
 		{
 			// Create an object and pack it. Then remove that pack and put the
@@ -101,7 +102,7 @@ namespace NGit.Storage.File
 			Repository eden = CreateBareRepository();
 			RevObject o1 = WriteBlob(eden, "o1");
 			FilePath[] out1 = Pack(eden, o1);
-			NUnit.Framework.Assert.AreEqual(o1.Name, Parse(o1).Name);
+			Assert.AreEqual(o1.Name, Parse(o1).Name);
 			RevObject o2 = WriteBlob(eden, "o2");
 			Pack(eden, o2, o1);
 			// Force close, and then delete, the old pack.
@@ -111,13 +112,13 @@ namespace NGit.Storage.File
 			// Now here is the interesting thing. Will git figure the new
 			// object exists in the new pack, and not the old one.
 			//
-			NUnit.Framework.Assert.AreEqual(o2.Name, Parse(o2).Name);
-			NUnit.Framework.Assert.AreEqual(o1.Name, Parse(o1).Name);
+			Assert.AreEqual(o2.Name, Parse(o2).Name);
+			Assert.AreEqual(o1.Name, Parse(o1).Name);
 		}
 
 		/// <exception cref="NGit.Errors.IncorrectObjectTypeException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestObjectMovedWithinPack()
 		{
 			// Create an object and pack it.
@@ -125,7 +126,7 @@ namespace NGit.Storage.File
 			Repository eden = CreateBareRepository();
 			RevObject o1 = WriteBlob(eden, "o1");
 			FilePath[] out1 = Pack(eden, o1);
-			NUnit.Framework.Assert.AreEqual(o1.Name, Parse(o1).Name);
+			Assert.AreEqual(o1.Name, Parse(o1).Name);
 			// Force close the old pack.
 			//
 			WhackCache();
@@ -143,13 +144,13 @@ namespace NGit.Storage.File
 			// Try the old name, then the new name. The old name should cause the
 			// pack to reload when it opens and the index and pack mismatch.
 			//
-			NUnit.Framework.Assert.AreEqual(o1.Name, Parse(o1).Name);
-			NUnit.Framework.Assert.AreEqual(o2.Name, Parse(o2).Name);
+			Assert.AreEqual(o1.Name, Parse(o1).Name);
+			Assert.AreEqual(o2.Name, Parse(o2).Name);
 		}
 
 		/// <exception cref="NGit.Errors.IncorrectObjectTypeException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestObjectMovedToNewPack2()
 		{
 			// Create an object and pack it. Then remove that pack and put the
@@ -159,9 +160,9 @@ namespace NGit.Storage.File
 			Repository eden = CreateBareRepository();
 			RevObject o1 = WriteBlob(eden, "o1");
 			FilePath[] out1 = Pack(eden, o1);
-			NUnit.Framework.Assert.AreEqual(o1.Name, Parse(o1).Name);
+			Assert.AreEqual(o1.Name, Parse(o1).Name);
 			ObjectLoader load1 = db.Open(o1, Constants.OBJ_BLOB);
-			NUnit.Framework.Assert.IsNotNull(load1);
+			Assert.IsNotNull(load1);
 			RevObject o2 = WriteBlob(eden, "o2");
 			Pack(eden, o2, o1);
 			// Force close, and then delete, the old pack.
@@ -173,16 +174,16 @@ namespace NGit.Storage.File
 			// pack is gone, but the object still exists.
 			//
 			ObjectLoader load2 = db.Open(o1, Constants.OBJ_BLOB);
-			NUnit.Framework.Assert.IsNotNull(load2);
-			NUnit.Framework.Assert.AreNotSame(load1, load2);
+			Assert.IsNotNull(load2);
+			Assert.AreNotSame(load1, load2);
 			byte[] data2 = load2.GetCachedBytes();
 			byte[] data1 = load1.GetCachedBytes();
-			NUnit.Framework.Assert.IsNotNull(data2);
-			NUnit.Framework.Assert.IsNotNull(data1);
-			NUnit.Framework.Assert.AreNotSame(data1, data2);
+			Assert.IsNotNull(data2);
+			Assert.IsNotNull(data1);
+			Assert.AreNotSame(data1, data2);
 			// cache should be per-pack, not per object
 			CollectionAssert.AreEquivalent(data1, data2);
-			NUnit.Framework.Assert.AreEqual(load2.GetType(), load1.GetType());
+			Assert.AreEqual(load2.GetType(), load1.GetType());
 		}
 
 		private static void WhackCache()
@@ -250,7 +251,7 @@ namespace NGit.Storage.File
 			foreach (FilePath f in list)
 			{
 				FileUtils.Delete(f);
-				NUnit.Framework.Assert.IsFalse(f.Exists(), f + " was removed");
+				Assert.IsFalse(f.Exists(), f + " was removed");
 			}
 			Touch(begin, list[0].GetParentFile());
 		}
@@ -297,7 +298,7 @@ namespace NGit.Storage.File
 			try
 			{
 				Parse(id);
-				NUnit.Framework.Assert.Fail("Object " + id.Name + " should not exist in test repository"
+				Assert.Fail("Object " + id.Name + " should not exist in test repository"
 					);
 			}
 			catch (MissingObjectException)

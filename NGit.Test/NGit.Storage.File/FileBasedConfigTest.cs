@@ -41,9 +41,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-using NGit.Storage.File;
 using NGit.Util;
-using NUnit.Framework;
 using Sharpen;
 
 namespace NGit.Storage.File
@@ -85,7 +83,7 @@ namespace NGit.Storage.File
 			NUnit.Framework.Assert.AreEqual(ALICE, config.GetString(USER, null, NAME));
 			config.SetString(USER, null, NAME, BOB);
 			config.Save();
-			Assert.AssertArrayEquals(Sharpen.Runtime.GetBytesForString(CONTENT2), IOUtil.ReadFully
+			Assert.AreEqual(Sharpen.Runtime.GetBytesForString(CONTENT2), IOUtil.ReadFully
 				(file));
 		}
 
@@ -100,7 +98,7 @@ namespace NGit.Storage.File
 			NUnit.Framework.Assert.AreEqual(ALICE, config.GetString(USER, null, NAME));
 			config.SetString(USER, null, NAME, BOB);
 			config.Save();
-			Assert.AssertArrayEquals(Sharpen.Runtime.GetBytesForString(CONTENT2), IOUtil.ReadFully
+			Assert.AreEqual(Sharpen.Runtime.GetBytesForString(CONTENT2), IOUtil.ReadFully
 				(file));
 		}
 
@@ -125,7 +123,7 @@ namespace NGit.Storage.File
 			bos2.Write(unchecked((int)(0xBB)));
 			bos2.Write(unchecked((int)(0xBF)));
 			bos2.Write(Sharpen.Runtime.GetBytesForString(CONTENT2, "UTF-8"));
-			Assert.AssertArrayEquals(bos2.ToByteArray(), IOUtil.ReadFully(file));
+			Assert.AreEqual(bos2.ToByteArray(), IOUtil.ReadFully(file));
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
@@ -145,7 +143,7 @@ namespace NGit.Storage.File
 			ByteArrayOutputStream bos2 = new ByteArrayOutputStream();
 			bos2.Write(Sharpen.Runtime.GetBytesForString(" \n\t"));
 			bos2.Write(Sharpen.Runtime.GetBytesForString(CONTENT2));
-			Assert.AssertArrayEquals(bos2.ToByteArray(), IOUtil.ReadFully(file));
+			Assert.AreEqual(bos2.ToByteArray(), IOUtil.ReadFully(file));
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>

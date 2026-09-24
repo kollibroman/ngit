@@ -42,10 +42,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 using NGit.Errors;
-using NGit.Fnmatch;
-using NGit.Junit;
-using Sharpen;
-using NUnit.Framework;
 
 namespace NGit.Fnmatch
 {

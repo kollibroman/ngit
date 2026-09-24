@@ -47,6 +47,7 @@ using NGit.Junit;
 using NGit.Util;
 using NUnit.Framework;
 using Sharpen;
+using Assert = NUnit.Framework.Assert;
 
 namespace NGit.Util
 {

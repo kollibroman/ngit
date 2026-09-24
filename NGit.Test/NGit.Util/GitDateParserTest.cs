@@ -42,6 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 using System;
+using System.Globalization;
 using NGit.Junit;
 using NGit.Util;
 using NUnit.Framework;

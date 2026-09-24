@@ -42,13 +42,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 using System.Collections.Generic;
-using NGit;
-using NGit.Dircache;
 using NGit.Errors;
 using NGit.Junit;
 using NGit.Treewalk;
 using NGit.Util;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
 namespace NGit.Dircache
@@ -231,8 +229,8 @@ namespace NGit.Dircache
 		{
 			DirCacheEntry entry = dc.GetEntry(indexPosition);
 			NUnit.Framework.Assert.AreEqual(path, entry.PathString);
-			Assert.AreEqual(skipWorkTree, entry.IsSkipWorkTree);
-			Assert.AreEqual(intentToAdd, entry.IsIntentToAdd);
+			NUnit.Framework.Assert.AreEqual(skipWorkTree, entry.IsSkipWorkTree);
+			NUnit.Framework.Assert.AreEqual(intentToAdd, entry.IsIntentToAdd);
 		}
 
 		private FilePath PathOf(string name)

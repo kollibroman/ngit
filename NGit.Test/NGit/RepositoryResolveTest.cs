@@ -46,6 +46,7 @@ using NGit.Api;
 using NGit.Errors;
 using NGit.Revwalk;
 using NGit.Storage.File;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit

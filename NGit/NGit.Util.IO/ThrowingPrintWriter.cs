@@ -42,6 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 using System.IO;
+using System.Text;
 using NGit.Util;
 using Sharpen;
 
@@ -83,6 +84,8 @@ namespace NGit.Util.IO
 		{
 			@out.Write(cbuf, off, len);
 		}
+
+		public override Encoding Encoding { get; }
 
 		/// <exception cref="System.IO.IOException"></exception>
 		public override void Flush()

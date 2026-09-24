@@ -44,26 +44,28 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NGit;
 using NGit.Api;
+using NGit.Api.Errors;
 using NGit.Dircache;
+using NGit.Errors;
 using NGit.Revwalk;
 using NGit.Storage.File;
 using NGit.Treewalk;
 using NGit.Util;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
-namespace NGit
+namespace NGit.Test.NGit
 {
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class DirCacheCheckoutTest : RepositoryTestCase
 	{
 		private DirCacheCheckout dco;
 
-		protected internal ObjectId theHead;
+		private ObjectId theHead;
 
-		protected internal ObjectId theMerge;
+		private ObjectId theMerge;
 
 		private DirCache dirCache;
 
@@ -133,9 +135,9 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		/// <exception cref="NGit.Api.Errors.NoFilepatternException"></exception>
-		/// <exception cref="NGit.Api.Errors.GitAPIException"></exception>
-		[NUnit.Framework.Test]
+		/// <exception cref="NoFilepatternException"></exception>
+		/// <exception cref="GitAPIException"></exception>
+		[Test]
 		public virtual void TestResetHard()
 		{
 			Git git = new Git(db);
@@ -154,7 +156,7 @@ namespace NGit
 			CheckoutBranch("refs/heads/topic");
 			AssertIndex(Mkmap("f", "f()", "D/g", "g()"));
 			WriteTrashFile("f", "f()\nside");
-			NUnit.Framework.Assert.IsTrue(new FilePath(db.WorkTree, "D/g").Delete());
+			Assert.IsTrue(new FilePath(db.WorkTree, "D/g").Delete());
 			WriteTrashFile("G/i", "i()");
 			git.Add().AddFilepattern(".").Call();
 			git.Add().AddFilepattern(".").SetUpdate(true).Call();
@@ -166,9 +168,9 @@ namespace NGit
 			ResetHard(topic);
 			AssertIndex(Mkmap("f", "f()\nside", "G/i", "i()"));
 			AssertWorkDir(Mkmap("f", "f()\nside", "G/i", "i()", "untracked", "untracked"));
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, git.Merge().Include(master
+			Assert.AreEqual(MergeStatus.CONFLICTING, git.Merge().Include(master
 				).Call().GetMergeStatus());
-			NUnit.Framework.Assert.AreEqual("[D/g, mode:100644, stage:1][D/g, mode:100644, stage:3][E/h, mode:100644][G/i, mode:100644][f, mode:100644, stage:1][f, mode:100644, stage:2][f, mode:100644, stage:3]"
+			Assert.AreEqual("[D/g, mode:100644, stage:1][D/g, mode:100644, stage:3][E/h, mode:100644][G/i, mode:100644][f, mode:100644, stage:1][f, mode:100644, stage:2][f, mode:100644, stage:3]"
 				, IndexState(0));
 			ResetHard(master);
 			AssertIndex(Mkmap("f", "f()\nmaster", "D/g", "g()\ng2()", "E/h", "h()"));
@@ -185,7 +187,7 @@ namespace NGit
 		/// Merge: x
 		/// </remarks>
 		/// <exception cref="System.Exception">System.Exception</exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestResetHardFromIndexEntryWithoutFileToTreeWithoutFile()
 		{
 			Git git = new Git(db);
@@ -203,41 +205,41 @@ namespace NGit
 			AssertIndex(Mkmap("x", "x"));
 		}
 
-		/// <exception cref="NGit.Errors.NoWorkTreeException"></exception>
-		/// <exception cref="NGit.Errors.CorruptObjectException"></exception>
+		/// <exception cref="NoWorkTreeException"></exception>
+		/// <exception cref="CorruptObjectException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
 		private DirCacheCheckout ResetHard(RevCommit commit)
 		{
 			DirCacheCheckout dc;
 			dc = new DirCacheCheckout(db, null, db.LockDirCache(), commit.Tree);
 			dc.SetFailOnConflict(true);
-			NUnit.Framework.Assert.IsTrue(dc.Checkout());
+			Assert.IsTrue(dc.Checkout());
 			return dc;
 		}
 
-		/// <exception cref="NGit.Errors.CorruptObjectException"></exception>
+		/// <exception cref="CorruptObjectException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
 		private void AssertIndex(Dictionary<string, string> i)
 		{
 			string expectedValue;
 			string path;
 			DirCache read = DirCache.Read(db.GetIndexFile(), db.FileSystem);
-			NUnit.Framework.Assert.AreEqual(i.Count, read.GetEntryCount(), "Index has not the right size."
+			Assert.AreEqual(i.Count, read.GetEntryCount(), "Index has not the right size."
 				);
 			for (int j = 0; j < read.GetEntryCount(); j++)
 			{
 				path = read.GetEntry(j).PathString;
 				expectedValue = i.Get(path);
-				NUnit.Framework.Assert.IsNotNull(expectedValue, "found unexpected entry for path "
+				Assert.IsNotNull(expectedValue, "found unexpected entry for path "
 					 + path + " in index");
-				NUnit.Framework.Assert.IsTrue(Arrays.Equals(db.Open(read.GetEntry(j).GetObjectId(
+				Assert.IsTrue(Arrays.Equals(db.Open(read.GetEntry(j).GetObjectId(
 					)).GetCachedBytes(), Sharpen.Runtime.GetBytesForString(i.Get(path))), "unexpected content for path "
 					 + path + " in index. Expected: <" + expectedValue + ">");
 			}
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestRules1thru3_NoIndexEntry()
 		{
 			ObjectId head = BuildTree(Mk("foo"));
@@ -245,9 +247,9 @@ namespace NGit
 			ObjectId objectId = tw.GetObjectId(0);
 			ObjectId merge = db.NewObjectInserter().Insert(Constants.OBJ_TREE, new byte[0]);
 			PrescanTwoTrees(head, merge);
-			NUnit.Framework.Assert.IsTrue(GetRemoved().Contains("foo"));
+			Assert.IsTrue(GetRemoved().Contains("foo"));
 			PrescanTwoTrees(merge, head);
-			NUnit.Framework.Assert.AreEqual(objectId, GetUpdated().Get("foo"));
+			Assert.AreEqual(objectId, GetUpdated().Get("foo"));
 			merge = BuildTree(Mkmap("foo", "a"));
 			tw = TreeWalk.ForPath(db, "foo", merge);
 			PrescanTwoTrees(head, merge);
@@ -269,7 +271,7 @@ namespace NGit
 			dirCache = new DirCache(db.GetIndexFile(), db.FileSystem);
 			if (indexEntries != null)
 			{
-				NUnit.Framework.Assert.IsTrue(dirCache.Lock());
+				Assert.IsTrue(dirCache.Lock());
 				DirCacheEditor editor = dirCache.Editor();
 				foreach (KeyValuePair<string, string> e in indexEntries.EntrySet())
 				{
@@ -279,7 +281,7 @@ namespace NGit
 					editor.Add(new DirCacheEditor.DeletePath(e.Key));
 					editor.Add(new _PathEdit_287(id, e.Key));
 				}
-				NUnit.Framework.Assert.IsTrue(editor.Commit());
+				Assert.IsTrue(editor.Commit());
 			}
 		}
 
@@ -351,7 +353,7 @@ namespace NGit
 			}
 			catch (IOException e)
 			{
-				NUnit.Framework.Assert.Fail(e.ToString());
+				Assert.Fail(e.ToString());
 			}
 			finally
 			{
@@ -368,7 +370,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestRules4thru13_IndexEntryNotInHead()
 		{
 			// rules 4 and 5
@@ -377,9 +379,9 @@ namespace NGit
 			idxMap.Put("foo", "foo");
 			SetupCase(null, null, idxMap);
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetUpdated().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetRemoved().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetConflicts().IsEmpty());
+			Assert.IsTrue(GetUpdated().IsEmpty());
+			Assert.IsTrue(GetRemoved().IsEmpty());
+			Assert.IsTrue(GetConflicts().IsEmpty());
 			// rules 6 and 7
 			idxMap = new Dictionary<string, string>();
 			idxMap.Put("foo", "foo");
@@ -392,33 +394,33 @@ namespace NGit
 			mergeMap.Put("foo", "merge");
 			SetupCase(null, mergeMap, idxMap);
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetUpdated().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetRemoved().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetConflicts().Contains("foo"));
+			Assert.IsTrue(GetUpdated().IsEmpty());
+			Assert.IsTrue(GetRemoved().IsEmpty());
+			Assert.IsTrue(GetConflicts().Contains("foo"));
 			// rule 10
 			Dictionary<string, string> headMap = new Dictionary<string, string>();
 			headMap.Put("foo", "foo");
 			SetupCase(headMap, null, idxMap);
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetRemoved().Contains("foo"));
-			NUnit.Framework.Assert.IsTrue(GetUpdated().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetConflicts().IsEmpty());
+			Assert.IsTrue(GetRemoved().Contains("foo"));
+			Assert.IsTrue(GetUpdated().IsEmpty());
+			Assert.IsTrue(GetConflicts().IsEmpty());
 			// rule 11
 			SetupCase(headMap, null, idxMap);
-			NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo").Delete());
+			Assert.IsTrue(new FilePath(trash, "foo").Delete());
 			WriteTrashFile("foo", "bar");
 			db.ReadDirCache().GetEntry(0).IsUpdateNeeded = true;
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetRemoved().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetUpdated().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetConflicts().Contains("foo"));
+			Assert.IsTrue(GetRemoved().IsEmpty());
+			Assert.IsTrue(GetUpdated().IsEmpty());
+			Assert.IsTrue(GetConflicts().Contains("foo"));
 			// rule 12 & 13
 			headMap.Put("foo", "head");
 			SetupCase(headMap, null, idxMap);
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetRemoved().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetUpdated().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetConflicts().Contains("foo"));
+			Assert.IsTrue(GetRemoved().IsEmpty());
+			Assert.IsTrue(GetUpdated().IsEmpty());
+			Assert.IsTrue(GetConflicts().Contains("foo"));
 			// rules 14 & 15
 			SetupCase(headMap, headMap, idxMap);
 			Go();
@@ -426,7 +428,7 @@ namespace NGit
 			// rules 16 & 17
 			SetupCase(headMap, mergeMap, idxMap);
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetConflicts().Contains("foo"));
+			Assert.IsTrue(GetConflicts().Contains("foo"));
 			// rules 18 & 19
 			SetupCase(headMap, idxMap, idxMap);
 			Go();
@@ -434,42 +436,42 @@ namespace NGit
 			// rule 20
 			SetupCase(idxMap, mergeMap, idxMap);
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetUpdated().ContainsKey("foo"));
+			Assert.IsTrue(GetUpdated().ContainsKey("foo"));
 			// rules 21
 			SetupCase(idxMap, mergeMap, idxMap);
-			NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo").Delete());
+			Assert.IsTrue(new FilePath(trash, "foo").Delete());
 			WriteTrashFile("foo", "bar");
 			db.ReadDirCache().GetEntry(0).IsUpdateNeeded = true;
 			Go();
-			NUnit.Framework.Assert.IsTrue(GetConflicts().Contains("foo"));
+			Assert.IsTrue(GetConflicts().Contains("foo"));
 		}
 
 		private void AssertAllEmpty()
 		{
-			NUnit.Framework.Assert.IsTrue(GetRemoved().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetUpdated().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(GetConflicts().IsEmpty());
+			Assert.IsTrue(GetRemoved().IsEmpty());
+			Assert.IsTrue(GetUpdated().IsEmpty());
+			Assert.IsTrue(GetConflicts().IsEmpty());
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileSimple()
 		{
 			ObjectId treeDF = BuildTree(Mkmap("DF", "DF"));
 			ObjectId treeDFDF = BuildTree(Mkmap("DF/DF", "DF/DF"));
 			BuildIndex(Mkmap("DF", "DF"));
 			PrescanTwoTrees(treeDF, treeDFDF);
-			NUnit.Framework.Assert.IsTrue(GetRemoved().Contains("DF"));
-			NUnit.Framework.Assert.IsTrue(GetUpdated().ContainsKey("DF/DF"));
+			Assert.IsTrue(GetRemoved().Contains("DF"));
+			Assert.IsTrue(GetUpdated().ContainsKey("DF/DF"));
 			RecursiveDelete(new FilePath(trash, "DF"));
 			BuildIndex(Mkmap("DF/DF", "DF/DF"));
 			PrescanTwoTrees(treeDFDF, treeDF);
-			NUnit.Framework.Assert.IsTrue(GetRemoved().Contains("DF/DF"));
-			NUnit.Framework.Assert.IsTrue(GetUpdated().ContainsKey("DF"));
+			Assert.IsTrue(GetRemoved().Contains("DF/DF"));
+			Assert.IsTrue(GetUpdated().ContainsKey("DF"));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_1()
 		{
 			// 1
@@ -480,7 +482,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_2()
 		{
 			// 2
@@ -491,7 +493,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_3()
 		{
 			// 3
@@ -500,7 +502,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_4()
 		{
 			// 4 (basically same as 3, just with H and M different)
@@ -509,7 +511,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_5()
 		{
 			// 5
@@ -518,7 +520,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_6()
 		{
 			// 6
@@ -529,7 +531,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_7()
 		{
 			// 7
@@ -557,7 +559,7 @@ namespace NGit
 		// throwing away unsaved contents.
 		// This test would fail in DirCacheCheckoutTests.
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_8()
 		{
 			// 8
@@ -569,7 +571,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_9()
 		{
 			// 9
@@ -579,7 +581,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_10()
 		{
 			// 10
@@ -589,7 +591,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_11()
 		{
 			// 11
@@ -598,7 +600,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_12()
 		{
 			// 12
@@ -609,7 +611,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_13()
 		{
 			// 13
@@ -622,7 +624,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_14()
 		{
 			// 14
@@ -633,7 +635,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_15()
 		{
 			// 15
@@ -645,7 +647,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_15b()
 		{
 			// 15, take 2, just to check multi-leveled
@@ -658,7 +660,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_16()
 		{
 			// 16
@@ -669,7 +671,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_17()
 		{
 			// 17
@@ -686,7 +688,7 @@ namespace NGit
 		// This test would fail in DirCacheCheckout
 		// assertUpdated("DF");
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_18()
 		{
 			// 18
@@ -697,7 +699,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirectoryFileConflicts_19()
 		{
 			// 19
@@ -717,22 +719,22 @@ namespace NGit
 
 		protected internal virtual void AssertConflict(string s)
 		{
-			NUnit.Framework.Assert.IsTrue(GetConflicts().Contains(s));
+			Assert.IsTrue(GetConflicts().Contains(s));
 		}
 
 		protected internal virtual void AssertUpdated(string s)
 		{
-			NUnit.Framework.Assert.IsTrue(GetUpdated().ContainsKey(s));
+			Assert.IsTrue(GetUpdated().ContainsKey(s));
 		}
 
 		protected internal virtual void AssertRemoved(string s)
 		{
-			NUnit.Framework.Assert.IsTrue(GetRemoved().Contains(s));
+			Assert.IsTrue(GetRemoved().Contains(s));
 		}
 
 		protected internal virtual void AssertNoConflicts()
 		{
-			NUnit.Framework.Assert.IsTrue(GetConflicts().IsEmpty());
+			Assert.IsTrue(GetConflicts().IsEmpty());
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
@@ -744,7 +746,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestUntrackedConflicts()
 		{
 			SetupCase(null, Mk("foo"), null);
@@ -757,9 +759,9 @@ namespace NGit
 			try
 			{
 				Checkout();
-				NUnit.Framework.Assert.Fail("didn't get the expected exception");
+				Assert.Fail("didn't get the expected exception");
 			}
-			catch (NGit.Errors.CheckoutConflictException)
+			catch (global::NGit.Errors.CheckoutConflictException)
 			{
 				AssertConflict("foo");
 				AssertWorkDir(Mkmap("foo", "bar", "other", "other"));
@@ -773,9 +775,9 @@ namespace NGit
 			try
 			{
 				Checkout();
-				NUnit.Framework.Assert.Fail("didn't get the expected exception");
+				Assert.Fail("didn't get the expected exception");
 			}
-			catch (NGit.Errors.CheckoutConflictException)
+			catch (global::NGit.Errors.CheckoutConflictException)
 			{
 				AssertConflict("foo");
 				AssertWorkDir(Mkmap("foo", "bar"));
@@ -801,13 +803,13 @@ namespace NGit
 			RecursiveDelete(new FilePath(trash, "foo"));
 			SetupCase(Mkmap("foo/bar", string.Empty, "foo/baz", string.Empty), Mk("foo"), Mkmap
 				("foo/bar", string.Empty, "foo/baz", string.Empty));
-			NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo/bar").Exists());
+			Assert.IsTrue(new FilePath(trash, "foo/bar").Exists());
 			Go();
 			AssertNoConflicts();
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCloseNameConflictsX0()
 		{
 			SetupCase(Mkmap("a/a", "a/a-c"), Mkmap("a/a", "a/a", "b.b/b.b", "b.b/b.bs"), Mkmap
@@ -822,7 +824,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCloseNameConflicts1()
 		{
 			SetupCase(Mkmap("a/a", "a/a-c"), Mkmap("a/a", "a/a", "a.a/a.a", "a.a/a.a"), Mkmap
@@ -837,7 +839,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutHierarchy()
 		{
 			SetupCase(Mkmap("a", "a", "b/c", "b/c", "d", "d", "e/f", "e/f", "e/g", "e/g"), Mkmap
@@ -847,7 +849,7 @@ namespace NGit
 			{
 				Checkout();
 			}
-			catch (NGit.Errors.CheckoutConflictException)
+			catch (global::NGit.Errors.CheckoutConflictException)
 			{
 				AssertWorkDir(Mkmap("a", "a", "b/c", "b/c", "d", "d", "e/f", "e/f", "e/g", "e/g3"
 					));
@@ -856,32 +858,32 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutOutChanges()
 		{
 			SetupCase(Mk("foo"), Mk("foo/bar"), Mk("foo"));
 			Checkout();
 			AssertIndex(Mk("foo/bar"));
 			AssertWorkDir(Mk("foo/bar"));
-			NUnit.Framework.Assert.IsFalse(new FilePath(trash, "foo").IsFile());
-			NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo/bar").IsFile());
+			Assert.IsFalse(new FilePath(trash, "foo").IsFile());
+			Assert.IsTrue(new FilePath(trash, "foo/bar").IsFile());
 			RecursiveDelete(new FilePath(trash, "foo"));
 			AssertWorkDir(Mkmap());
 			SetupCase(Mk("foo/bar"), Mk("foo"), Mk("foo/bar"));
 			Checkout();
 			AssertIndex(Mk("foo"));
 			AssertWorkDir(Mk("foo"));
-			NUnit.Framework.Assert.IsFalse(new FilePath(trash, "foo/bar").IsFile());
-			NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo").IsFile());
+			Assert.IsFalse(new FilePath(trash, "foo/bar").IsFile());
+			Assert.IsTrue(new FilePath(trash, "foo").IsFile());
 			SetupCase(Mk("foo"), Mkmap("foo", "qux"), Mkmap("foo", "bar"));
 			AssertIndex(Mkmap("foo", "bar"));
 			AssertWorkDir(Mkmap("foo", "bar"));
 			try
 			{
 				Checkout();
-				NUnit.Framework.Assert.Fail("did not throw exception");
+				Assert.Fail("did not throw exception");
 			}
-			catch (NGit.Errors.CheckoutConflictException)
+			catch (global::NGit.Errors.CheckoutConflictException)
 			{
 				AssertIndex(Mkmap("foo", "bar"));
 				AssertWorkDir(Mkmap("foo", "bar"));
@@ -889,7 +891,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutOutChangesAutoCRLFfalse()
 		{
 			SetupCase(Mk("foo"), Mkmap("foo/bar", "foo\nbar"), Mk("foo"));
@@ -899,7 +901,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutOutChangesAutoCRLFInput()
 		{
 			SetupCase(Mk("foo"), Mkmap("foo/bar", "foo\nbar"), Mk("foo"));
@@ -910,7 +912,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutOutChangesAutoCRLFtrue()
 		{
 			SetupCase(Mk("foo"), Mkmap("foo/bar", "foo\nbar"), Mk("foo"));
@@ -921,7 +923,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutOutChangesAutoCRLFtrueBinary()
 		{
 			SetupCase(Mk("foo"), Mkmap("foo/bar", "foo\nb\u0000ar"), Mk("foo"));
@@ -932,7 +934,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestCheckoutUncachedChanges()
 		{
 			SetupCase(Mk("foo"), Mk("foo"), Mk("foo"));
@@ -940,11 +942,11 @@ namespace NGit
 			Checkout();
 			AssertIndex(Mk("foo"));
 			AssertWorkDir(Mkmap("foo", "otherData"));
-			NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo").IsFile());
+			Assert.IsTrue(new FilePath(trash, "foo").IsFile());
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDontOverwriteDirtyFile()
 		{
 			SetupCase(Mk("foo"), Mk("other"), Mk("foo"));
@@ -952,19 +954,19 @@ namespace NGit
 			try
 			{
 				Checkout();
-				NUnit.Framework.Assert.Fail("Didn't got the expected conflict");
+				Assert.Fail("Didn't got the expected conflict");
 			}
-			catch (NGit.Errors.CheckoutConflictException)
+			catch (Errors.CheckoutConflictException)
 			{
 				AssertIndex(Mk("foo"));
 				AssertWorkDir(Mkmap("foo", "different"));
-				NUnit.Framework.Assert.AreEqual(Arrays.AsList("foo"), GetConflicts());
-				NUnit.Framework.Assert.IsTrue(new FilePath(trash, "foo").IsFile());
+				Assert.AreEqual(Arrays.AsList("foo"), GetConflicts());
+				Assert.IsTrue(new FilePath(trash, "foo").IsFile());
 			}
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFileModeChangeWithNoContentChangeUpdate()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -976,7 +978,7 @@ namespace NGit
 			FilePath file = WriteTrashFile("file.txt", "a");
 			git.Add().AddFilepattern("file.txt").Call();
 			git.Commit().SetMessage("commit1").Call();
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file));
+			Assert.IsFalse(db.FileSystem.CanExecute(file));
 			// Create branch
 			git.BranchCreate().SetName("b1").Call();
 			// Make file executable
@@ -985,20 +987,20 @@ namespace NGit
 			git.Commit().SetMessage("commit2").Call();
 			// Verify executable and working directory is clean
 			Status status = git.Status().Call();
-			NUnit.Framework.Assert.IsTrue(status.GetModified().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(status.GetChanged().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(db.FileSystem.CanExecute(file));
+			Assert.IsTrue(status.GetModified().IsEmpty());
+			Assert.IsTrue(status.GetChanged().IsEmpty());
+			Assert.IsTrue(db.FileSystem.CanExecute(file));
 			// Switch branches
 			git.Checkout().SetName("b1").Call();
 			// Verify not executable and working directory is clean
 			status = git.Status().Call();
-			NUnit.Framework.Assert.IsTrue(status.GetModified().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(status.GetChanged().IsEmpty());
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file));
+			Assert.IsTrue(status.GetModified().IsEmpty());
+			Assert.IsTrue(status.GetChanged().IsEmpty());
+			Assert.IsFalse(db.FileSystem.CanExecute(file));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFileModeChangeAndContentChangeConflict()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -1010,7 +1012,7 @@ namespace NGit
 			FilePath file = WriteTrashFile("file.txt", "a");
 			git.Add().AddFilepattern("file.txt").Call();
 			git.Commit().SetMessage("commit1").Call();
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file));
+			Assert.IsFalse(db.FileSystem.CanExecute(file));
 			// Create branch
 			git.BranchCreate().SetName("b1").Call();
 			// Make file executable
@@ -1019,29 +1021,29 @@ namespace NGit
 			git.Commit().SetMessage("commit2").Call();
 			// Verify executable and working directory is clean
 			Status status = git.Status().Call();
-			NUnit.Framework.Assert.IsTrue(status.GetModified().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(status.GetChanged().IsEmpty());
-			NUnit.Framework.Assert.IsTrue(db.FileSystem.CanExecute(file));
+			Assert.IsTrue(status.GetModified().IsEmpty());
+			Assert.IsTrue(status.GetChanged().IsEmpty());
+			Assert.IsTrue(db.FileSystem.CanExecute(file));
 			WriteTrashFile("file.txt", "b");
 			// Switch branches
 			CheckoutCommand checkout = git.Checkout().SetName("b1");
 			try
 			{
 				checkout.Call();
-				NUnit.Framework.Assert.Fail("Checkout exception not thrown");
+				Assert.Fail("Checkout exception not thrown");
 			}
-			catch (NGit.Api.Errors.CheckoutConflictException)
+			catch (global::NGit.Api.Errors.CheckoutConflictException)
 			{
 				CheckoutResult result = checkout.GetResult();
-				NUnit.Framework.Assert.IsNotNull(result);
-				NUnit.Framework.Assert.IsNotNull(result.GetConflictList());
-				NUnit.Framework.Assert.AreEqual(1, result.GetConflictList().Count);
-				NUnit.Framework.Assert.IsTrue(result.GetConflictList().Contains("file.txt"));
+				Assert.IsNotNull(result);
+				Assert.IsNotNull(result.GetConflictList());
+				Assert.AreEqual(1, result.GetConflictList().Count);
+				Assert.IsTrue(result.GetConflictList().Contains("file.txt"));
 			}
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirtyFileModeEqualHeadMerge()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -1053,7 +1055,7 @@ namespace NGit
 			FilePath file = WriteTrashFile("file.txt", "a");
 			git.Add().AddFilepattern("file.txt").Call();
 			git.Commit().SetMessage("commit1").Call();
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file));
+			Assert.IsFalse(db.FileSystem.CanExecute(file));
 			// Create branch
 			git.BranchCreate().SetName("b1").Call();
 			// Create second commit and don't touch file
@@ -1066,19 +1068,19 @@ namespace NGit
 			git.Add().AddFilepattern("file.txt").Call();
 			// dirty the file
 			WriteTrashFile("file.txt", "b");
-			NUnit.Framework.Assert.AreEqual("[file.txt, mode:100755, content:a][file2.txt, mode:100644, content:]"
+			Assert.AreEqual("[file.txt, mode:100755, content:a][file2.txt, mode:100644, content:]"
 				, IndexState(CONTENT));
 			AssertWorkDir(Mkmap("file.txt", "b", "file2.txt", string.Empty));
 			// Switch branches and check that the dirty file survived in worktree
 			// and index
 			git.Checkout().SetName("b1").Call();
-			NUnit.Framework.Assert.AreEqual("[file.txt, mode:100755, content:a]", IndexState(
+			Assert.AreEqual("[file.txt, mode:100755, content:a]", IndexState(
 				CONTENT));
 			AssertWorkDir(Mkmap("file.txt", "b"));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestDirtyFileModeEqualIndexMerge()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -1090,7 +1092,7 @@ namespace NGit
 			FilePath file = WriteTrashFile("file.txt", "a");
 			git.Add().AddFilepattern("file.txt").Call();
 			git.Commit().SetMessage("commit1").Call();
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file));
+			Assert.IsFalse(db.FileSystem.CanExecute(file));
 			// Create branch
 			git.BranchCreate().SetName("b1").Call();
 			// Create second commit with executable file
@@ -1105,19 +1107,19 @@ namespace NGit
 			// dirty the file
 			WriteTrashFile("file.txt", "c");
 			db.FileSystem.SetExecute(file, true);
-			NUnit.Framework.Assert.AreEqual("[file.txt, mode:100644, content:a]", IndexState(
+			Assert.AreEqual("[file.txt, mode:100644, content:a]", IndexState(
 				CONTENT));
 			AssertWorkDir(Mkmap("file.txt", "c"));
 			// Switch branches and check that the dirty file survived in worktree
 			// and index
 			git.Checkout().SetName("b1").Call();
-			NUnit.Framework.Assert.AreEqual("[file.txt, mode:100644, content:a]", IndexState(
+			Assert.AreEqual("[file.txt, mode:100644, content:a]", IndexState(
 				CONTENT));
 			AssertWorkDir(Mkmap("file.txt", "c"));
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestFileModeChangeAndContentChangeNoConflict()
 		{
 			if (!FS.DETECTED.SupportsExecute())
@@ -1129,24 +1131,24 @@ namespace NGit
 			FilePath file1 = WriteTrashFile("file1.txt", "a");
 			git.Add().AddFilepattern("file1.txt").Call();
 			git.Commit().SetMessage("commit1").Call();
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file1));
+			Assert.IsFalse(db.FileSystem.CanExecute(file1));
 			// Add second file
 			FilePath file2 = WriteTrashFile("file2.txt", "b");
 			git.Add().AddFilepattern("file2.txt").Call();
 			git.Commit().SetMessage("commit2").Call();
-			NUnit.Framework.Assert.IsFalse(db.FileSystem.CanExecute(file2));
+			Assert.IsFalse(db.FileSystem.CanExecute(file2));
 			// Create branch from first commit
-			NUnit.Framework.Assert.IsNotNull(git.Checkout().SetCreateBranch(true).SetName("b1"
+			Assert.IsNotNull(git.Checkout().SetCreateBranch(true).SetName("b1"
 				).SetStartPoint(Constants.HEAD + "~1").Call());
 			// Change content and file mode in working directory and index
 			file1 = WriteTrashFile("file1.txt", "c");
 			db.FileSystem.SetExecute(file1, true);
 			git.Add().AddFilepattern("file1.txt").Call();
 			// Switch back to 'master'
-			NUnit.Framework.Assert.IsNotNull(git.Checkout().SetName(Constants.MASTER).Call());
+			Assert.IsNotNull(git.Checkout().SetName(Constants.MASTER).Call());
 		}
 
-		/// <exception cref="NGit.Errors.CorruptObjectException"></exception>
+		/// <exception cref="CorruptObjectException"></exception>
 		/// <exception cref="System.IO.IOException"></exception>
 		public virtual void AssertWorkDir(Dictionary<string, string> i)
 		{
@@ -1162,10 +1164,10 @@ namespace NGit
 				ft = walk.GetTree<FileTreeIterator>(0);
 				path = ft.EntryPathString;
 				expectedValue = i.Get(path);
-				NUnit.Framework.Assert.IsNotNull(expectedValue, "found unexpected file for path "
+				Assert.IsNotNull(expectedValue, "found unexpected file for path "
 					 + path + " in workdir");
 				FilePath file = new FilePath(db.WorkTree, path);
-				NUnit.Framework.Assert.IsTrue(file.Exists());
+				Assert.IsTrue(file.Exists());
 				if (file.IsFile())
 				{
 					FileInputStream @is = new FileInputStream(file);
@@ -1179,12 +1181,12 @@ namespace NGit
 					}
 					@is.Close();
 					
-					CollectionAssert.AreEqual (buffer, Sharpen.Runtime.GetBytesForString(i.Get(path)), 
+					CollectionAssert.AreEqual (buffer, Runtime.GetBytesForString(i.Get(path)), 
 						"unexpected content for path " + path + " in workDir. ");
 					nrFiles++;
 				}
 			}
-			NUnit.Framework.Assert.AreEqual(i.Count, nrFiles, "WorkDir has not the right size."
+			Assert.AreEqual(i.Count, nrFiles, "WorkDir has not the right size."
 				);
 		}
 	}

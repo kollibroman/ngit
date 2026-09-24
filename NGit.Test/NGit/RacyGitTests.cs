@@ -44,6 +44,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using NGit;
 using NGit.Treewalk;
 using NGit.Util;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit

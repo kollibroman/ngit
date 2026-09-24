@@ -44,21 +44,19 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using NGit.Util;
-using NGit.Util.IO;
-using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
 namespace NGit.Util.IO
 {
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class TimeoutOutputStreamTest
 	{
 		private const int timeout = 250;
 
 		private PipedOutputStream @out;
 
-		private TimeoutOutputStreamTest.FullPipeInputStream @in;
+		private FullPipeInputStream @in;
 
 		private InterruptTimer timer;
 
@@ -67,39 +65,39 @@ namespace NGit.Util.IO
 		private long start;
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.SetUp]
+		[SetUp]
 		public virtual void SetUp()
 		{
 			@out = new PipedOutputStream();
-			@in = new TimeoutOutputStreamTest.FullPipeInputStream(this, @out);
+			@in = new FullPipeInputStream(this, @out);
 			timer = new InterruptTimer();
 			os = new TimeoutOutputStream(@out, timer);
 			os.SetTimeout(timeout);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.TearDown]
+		[TearDown]
 		public virtual void TearDown()
 		{
 			timer.Terminate();
 			foreach (Sharpen.Thread t in Active())
 			{
-				NUnit.Framework.Assert.IsFalse(t is InterruptTimer.AlarmThread);
+				Assert.IsFalse(t is InterruptTimer.AlarmThread);
 			}
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_writeByte_Success1()
 		{
 			@in.Free(1);
 			os.Write('a');
 			@in.Want(1);
-			NUnit.Framework.Assert.AreEqual('a', @in.Read());
+			Assert.AreEqual('a', @in.Read());
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_writeByte_Success2()
 		{
 			byte[] exp = new byte[] { (byte)('a'), (byte)('b'), (byte)('c') };
@@ -114,14 +112,14 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_writeByte_Timeout()
 		{
 			BeginWrite();
 			try
 			{
 				os.Write('\n');
-				NUnit.Framework.Assert.Fail("incorrectly write a byte");
+				Assert.Fail("incorrectly write a byte");
 			}
 			catch (ThreadInterruptedException)
 			{
@@ -131,7 +129,7 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_writeBuffer_Success1()
 		{
 			byte[] exp = new byte[] { (byte)('a'), (byte)('b'), (byte)('c') };
@@ -144,14 +142,14 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_writeBuffer_Timeout()
 		{
 			BeginWrite();
 			try
 			{
 				os.Write(new byte[512]);
-				NUnit.Framework.Assert.Fail("incorrectly wrote bytes");
+				Assert.Fail("incorrectly wrote bytes");
 			}
 			catch (ThreadInterruptedException)
 			{
@@ -161,14 +159,14 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_flush_Success()
 		{
 			bool[] called = new bool[1];
 			os = new TimeoutOutputStream(new _OutputStream_153(called), timer);
 			os.SetTimeout(timeout);
 			os.Flush();
-			NUnit.Framework.Assert.IsTrue(called[0]);
+			Assert.IsTrue(called[0]);
 		}
 
 		private sealed class _OutputStream_153 : OutputStream
@@ -181,7 +179,7 @@ namespace NGit.Util.IO
 			/// <exception cref="System.IO.IOException"></exception>
 			public override void Write(int b)
 			{
-				NUnit.Framework.Assert.Fail("should not have written");
+				Assert.Fail("should not have written");
 			}
 
 			/// <exception cref="System.IO.IOException"></exception>
@@ -194,7 +192,7 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_flush_Timeout()
 		{
 			bool[] called = new bool[1];
@@ -204,14 +202,14 @@ namespace NGit.Util.IO
 			try
 			{
 				os.Flush();
-				NUnit.Framework.Assert.Fail("incorrectly flushed");
+				Assert.Fail("incorrectly flushed");
 			}
 			catch (ThreadInterruptedException)
 			{
 			}
 			// expected
 			AssertTimeout();
-			NUnit.Framework.Assert.IsTrue(called[0]);
+			Assert.IsTrue(called[0]);
 		}
 
 		private sealed class _OutputStream_172 : OutputStream
@@ -224,7 +222,7 @@ namespace NGit.Util.IO
 			/// <exception cref="System.IO.IOException"></exception>
 			public override void Write(int b)
 			{
-				NUnit.Framework.Assert.Fail("should not have written");
+				Assert.Fail("should not have written");
 			}
 
 			/// <exception cref="System.IO.IOException"></exception>
@@ -248,14 +246,14 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_close_Success()
 		{
 			bool[] called = new bool[1];
 			os = new TimeoutOutputStream(new _OutputStream_206(called), timer);
 			os.SetTimeout(timeout);
 			os.Close();
-			NUnit.Framework.Assert.IsTrue(called[0]);
+			Assert.IsTrue(called[0]);
 		}
 
 		private sealed class _OutputStream_206 : OutputStream
@@ -268,7 +266,7 @@ namespace NGit.Util.IO
 			/// <exception cref="System.IO.IOException"></exception>
 			public override void Write(int b)
 			{
-				NUnit.Framework.Assert.Fail("should not have written");
+				Assert.Fail("should not have written");
 			}
 
 			/// <exception cref="System.IO.IOException"></exception>
@@ -281,7 +279,7 @@ namespace NGit.Util.IO
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestTimeout_close_Timeout()
 		{
 			bool[] called = new bool[1];
@@ -291,14 +289,14 @@ namespace NGit.Util.IO
 			try
 			{
 				os.Close();
-				NUnit.Framework.Assert.Fail("incorrectly closed");
+				Assert.Fail("incorrectly closed");
 			}
 			catch (ThreadInterruptedException)
 			{
 			}
 			// expected
 			AssertTimeout();
-			NUnit.Framework.Assert.IsTrue(called[0]);
+			Assert.IsTrue(called[0]);
 		}
 
 		private sealed class _OutputStream_225 : OutputStream
@@ -311,7 +309,7 @@ namespace NGit.Util.IO
 			/// <exception cref="System.IO.IOException"></exception>
 			public override void Write(int b)
 			{
-				NUnit.Framework.Assert.Fail("should not have written");
+				Assert.Fail("should not have written");
 			}
 
 			/// <exception cref="System.IO.IOException"></exception>
@@ -348,7 +346,7 @@ namespace NGit.Util.IO
 			// 50 ms of the expected timeout.
 			//
 			long wait = Now() - start;
-			NUnit.Framework.Assert.IsTrue(timeout - wait < 50, "waited only " + wait + " ms");
+			Assert.IsTrue(timeout - wait < 50, "waited only " + wait + " ms");
 		}
 
 		private static IList<Sharpen.Thread> Active()

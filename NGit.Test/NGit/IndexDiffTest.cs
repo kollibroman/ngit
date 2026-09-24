@@ -43,19 +43,21 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System.Collections.Generic;
 using System.IO;
-using NGit;
+using System.Linq;
 using NGit.Api;
+using NGit.Api.Errors;
 using NGit.Dircache;
 using NGit.Merge;
 using NGit.Revwalk;
 using NGit.Treewalk;
 using NGit.Util;
+using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
-using System.Linq;
 
-namespace NGit
+namespace NGit.Test.NGit
 {
-	[NUnit.Framework.TestFixture]
+	[TestFixture]
 	public class IndexDiffTest : RepositoryTestCase
 	{
 		/// <exception cref="System.IO.FileNotFoundException"></exception>
@@ -90,7 +92,7 @@ namespace NGit
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestAdded()
 		{
 			WriteTrashFile("file1", "file1");
@@ -105,18 +107,19 @@ namespace NGit
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, tree.GetId(), iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(2, diff.GetAdded().Count);
-			NUnit.Framework.Assert.IsTrue(diff.GetAdded().Contains("file1"));
-			NUnit.Framework.Assert.IsTrue(diff.GetAdded().Contains("dir/subfile"));
-			NUnit.Framework.Assert.AreEqual(0, diff.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetRemoved().Count);
-			NUnit.Framework.CollectionAssert.AreEquivalent(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.AreEqual(2, diff.GetAdded().Count);
+			Assert.IsTrue(diff.GetAdded().Contains("file1"));
+			Assert.IsTrue(diff.GetAdded().Contains("dir/subfile"));
+			Assert.AreEqual(0, diff.GetChanged().Count);
+			Assert.AreEqual(0, diff.GetModified().Count);
+			Assert.AreEqual(0, diff.GetRemoved().Count);
+			
+			CollectionAssert.AreEquivalent(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestRemoved()
 		{
 			WriteTrashFile("file2", "file2");
@@ -124,7 +127,7 @@ namespace NGit
 			Tree tree = new Tree(db);
 			tree.AddFile("file2");
 			tree.AddFile("dir/file3");
-			NUnit.Framework.Assert.AreEqual(2, tree.MemberCount());
+			Assert.AreEqual(2, tree.MemberCount());
 			tree.FindBlobMember("file2").SetId(ObjectId.FromString("30d67d4672d5c05833b7192cc77a79eaafb5c7ad"
 				));
 			Tree tree2 = (Tree)tree.FindTreeMember("dir");
@@ -135,19 +138,19 @@ namespace NGit
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, tree.GetId(), iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(2, diff.GetRemoved().Count);
-			NUnit.Framework.Assert.IsTrue(diff.GetRemoved().Contains("file2"));
-			NUnit.Framework.Assert.IsTrue(diff.GetRemoved().Contains("dir/file3"));
-			NUnit.Framework.Assert.AreEqual(0, diff.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.AreEqual(2, diff.GetRemoved().Count);
+			Assert.IsTrue(diff.GetRemoved().Contains("file2"));
+			Assert.IsTrue(diff.GetRemoved().Contains("dir/file3"));
+			Assert.AreEqual(0, diff.GetChanged().Count);
+			Assert.AreEqual(0, diff.GetModified().Count);
+			Assert.AreEqual(0, diff.GetAdded().Count);
+			Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		/// <exception cref="NGit.Api.Errors.GitAPIException"></exception>
-		[NUnit.Framework.Test]
+		/// <exception cref="GitAPIException"></exception>
+		[Test]
 		public virtual void TestModified()
 		{
 			WriteTrashFile("file2", "file2");
@@ -160,27 +163,27 @@ namespace NGit
 				));
 			tree.AddFile("dir/file3").SetId(ObjectId.FromString("0123456789012345678901234567890123456789"
 				));
-			NUnit.Framework.Assert.AreEqual(2, tree.MemberCount());
+			Assert.AreEqual(2, tree.MemberCount());
 			Tree tree2 = (Tree)tree.FindTreeMember("dir");
 			tree2.SetId(InsertTree(tree2));
 			tree.SetId(InsertTree(tree));
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, tree.GetId(), iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(2, diff.GetChanged().Count);
-			NUnit.Framework.Assert.IsTrue(diff.GetChanged().Contains("file2"));
-			NUnit.Framework.Assert.IsTrue(diff.GetChanged().Contains("dir/file3"));
-			NUnit.Framework.Assert.AreEqual(1, diff.GetModified().Count);
-			NUnit.Framework.Assert.IsTrue(diff.GetModified().Contains("dir/file3"));
-			NUnit.Framework.Assert.AreEqual(0, diff.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.AreEqual(2, diff.GetChanged().Count);
+			Assert.IsTrue(diff.GetChanged().Contains("file2"));
+			Assert.IsTrue(diff.GetChanged().Contains("dir/file3"));
+			Assert.AreEqual(1, diff.GetModified().Count);
+			Assert.IsTrue(diff.GetModified().Contains("dir/file3"));
+			Assert.AreEqual(0, diff.GetAdded().Count);
+			Assert.AreEqual(0, diff.GetRemoved().Count);
+			Assert.AreEqual(0, diff.GetMissing().Count);
+			Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestConflicting()
 		{
 			Git git = new Git(db);
@@ -203,23 +206,23 @@ namespace NGit
 			// merge side with master
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, Constants.HEAD, iterator);
 			diff.Diff();
-			NUnit.Framework.CollectionAssert.AreEqual("[b]", new TreeSet<string>(diff.GetChanged()).ToString
+			CollectionAssert.AreEqual("[b]", new TreeSet<string>(diff.GetChanged()).ToString
 				());
-			NUnit.Framework.CollectionAssert.IsEmpty (diff.GetAdded());
-			NUnit.Framework.CollectionAssert.IsEmpty (diff.GetRemoved());
-			NUnit.Framework.CollectionAssert.IsEmpty (diff.GetMissing());
-			NUnit.Framework.CollectionAssert.IsEmpty (diff.GetModified());
-			NUnit.Framework.Assert.AreEqual("a", diff.GetConflicting().First ());
-			NUnit.Framework.Assert.AreEqual(1, diff.GetConflicting().Count ());
-			NUnit.Framework.CollectionAssert.IsEmpty (diff.GetUntrackedFolders());
+			CollectionAssert.IsEmpty (diff.GetAdded());
+			CollectionAssert.IsEmpty (diff.GetRemoved());
+			CollectionAssert.IsEmpty (diff.GetMissing());
+			CollectionAssert.IsEmpty (diff.GetModified());
+			Assert.AreEqual("a", diff.GetConflicting().First ());
+			Assert.AreEqual(1, diff.GetConflicting().Count ());
+			CollectionAssert.IsEmpty (diff.GetUntrackedFolders());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestConflictingDeletedAndModified()
 		{
 			Git git = new Git(db);
@@ -240,24 +243,24 @@ namespace NGit
 			// merge side with master
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, Constants.HEAD, iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual("[]", new TreeSet<string>(diff.GetChanged()).ToString
+			Assert.AreEqual("[]", new TreeSet<string>(diff.GetChanged()).ToString
 				());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetAdded());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetRemoved());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetMissing());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetModified());
-			NUnit.Framework.Assert.AreEqual("a", diff.GetConflicting().First ());
-			NUnit.Framework.Assert.AreEqual(1, diff.GetConflicting().Count ());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetUntrackedFolders()
+			CollectionAssert.IsEmpty(diff.GetAdded());
+			CollectionAssert.IsEmpty(diff.GetRemoved());
+			CollectionAssert.IsEmpty(diff.GetMissing());
+			CollectionAssert.IsEmpty(diff.GetModified());
+			Assert.AreEqual("a", diff.GetConflicting().First ());
+			Assert.AreEqual(1, diff.GetConflicting().Count ());
+			CollectionAssert.IsEmpty(diff.GetUntrackedFolders()
 				);
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestConflictingFromMultipleCreations()
 		{
 			Git git = new Git(db);
@@ -275,25 +278,25 @@ namespace NGit
 			git.Commit().SetMessage("main").Call();
 			MergeCommandResult result = git.Merge().Include(secondCommit.Id).SetStrategy(MergeStrategy
 				.RESOLVE).Call();
-			NUnit.Framework.Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
+			Assert.AreEqual(MergeStatus.CONFLICTING, result.GetMergeStatus());
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, Constants.HEAD, iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual("[]", new TreeSet<string>(diff.GetChanged()).ToString
+			Assert.AreEqual("[]", new TreeSet<string>(diff.GetChanged()).ToString
 				());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetAdded());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetRemoved());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetMissing());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetModified());
-			NUnit.Framework.Assert.AreEqual(1, diff.GetConflicting().Count());
-			NUnit.Framework.Assert.AreEqual("b", diff.GetConflicting().First());
-			NUnit.Framework.CollectionAssert.IsEmpty(diff.GetUntrackedFolders()
+			CollectionAssert.IsEmpty(diff.GetAdded());
+			CollectionAssert.IsEmpty(diff.GetRemoved());
+			CollectionAssert.IsEmpty(diff.GetMissing());
+			CollectionAssert.IsEmpty(diff.GetModified());
+			Assert.AreEqual(1, diff.GetConflicting().Count());
+			Assert.AreEqual("b", diff.GetConflicting().First());
+			CollectionAssert.IsEmpty(diff.GetUntrackedFolders()
 				);
 		}
 
 		/// <exception cref="System.IO.IOException"></exception>
-		/// <exception cref="NGit.Api.Errors.GitAPIException"></exception>
-		[NUnit.Framework.Test]
+		/// <exception cref="GitAPIException"></exception>
+		[Test]
 		public virtual void TestUnchangedSimple()
 		{
 			WriteTrashFile("a.b", "a.b");
@@ -319,12 +322,12 @@ namespace NGit
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, tree.GetId(), iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(0, diff.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.AreEqual(0, diff.GetChanged().Count);
+			Assert.AreEqual(0, diff.GetAdded().Count);
+			Assert.AreEqual(0, diff.GetRemoved().Count);
+			Assert.AreEqual(0, diff.GetMissing().Count);
+			Assert.AreEqual(0, diff.GetModified().Count);
+			Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 		}
 
@@ -337,9 +340,9 @@ namespace NGit
 		/// used by Git.
 		/// </remarks>
 		/// <exception cref="System.IO.IOException">System.IO.IOException</exception>
-		/// <exception cref="NGit.Api.Errors.GitAPIException">NGit.Api.Errors.GitAPIException
+		/// <exception cref="GitAPIException">NGit.Api.Errors.GitAPIException
 		/// 	</exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestUnchangedComplex()
 		{
 			Git git = new Git(db);
@@ -376,12 +379,12 @@ namespace NGit
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, tree.GetId(), iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(0, diff.GetChanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetAdded().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetRemoved().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetMissing().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.AreEqual(0, diff.GetChanged().Count);
+			Assert.AreEqual(0, diff.GetAdded().Count);
+			Assert.AreEqual(0, diff.GetRemoved().Count);
+			Assert.AreEqual(0, diff.GetMissing().Count);
+			Assert.AreEqual(0, diff.GetModified().Count);
+			Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 		}
 
@@ -407,7 +410,7 @@ namespace NGit
 		/// is checked if IndexDiff detects this file as removed and untracked.
 		/// </remarks>
 		/// <exception cref="System.Exception">System.Exception</exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestRemovedUntracked()
 		{
 			Git git = new Git(db);
@@ -419,20 +422,20 @@ namespace NGit
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, Constants.HEAD, iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.IsTrue(diff.GetRemoved().Contains(path));
-			NUnit.Framework.Assert.IsTrue(diff.GetUntracked().Contains(path));
-			NUnit.Framework.Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.IsTrue(diff.GetRemoved().Contains(path));
+			Assert.IsTrue(diff.GetUntracked().Contains(path));
+			Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 		}
 
 		/// <exception cref="System.Exception">System.Exception</exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestUntrackedFolders()
 		{
 			Git git = new Git(db);
 			IndexDiff diff = new IndexDiff(db, Constants.HEAD, new FileTreeIterator(db));
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
+			Assert.AreEqual(Collections<string>.EMPTY_SET, diff.GetUntrackedFolders()
 				);
 			WriteTrashFile("readme", string.Empty);
 			WriteTrashFile("src/com/A.java", string.Empty);
@@ -447,25 +450,25 @@ namespace NGit
 			git.Commit().SetMessage("initial").Call();
 			diff = new IndexDiff(db, Constants.HEAD, new FileTreeIterator(db));
 			diff.Diff();
-			NUnit.Framework.CollectionAssert.AreEquivalent(new HashSet<string>(Arrays.AsList("target")), diff
+			CollectionAssert.AreEquivalent(new HashSet<string>(Arrays.AsList("target")), diff
 				.GetUntrackedFolders());
 			WriteTrashFile("src/tst/A.java", string.Empty);
 			WriteTrashFile("src/tst/B.java", string.Empty);
 			diff = new IndexDiff(db, Constants.HEAD, new FileTreeIterator(db));
 			diff.Diff();
-			NUnit.Framework.CollectionAssert.AreEquivalent(new HashSet<string>(Arrays.AsList("target", "src/tst"
+			CollectionAssert.AreEquivalent(new HashSet<string>(Arrays.AsList("target", "src/tst"
 				)), diff.GetUntrackedFolders());
 			git.Rm().AddFilepattern("src/com/B.java").AddFilepattern("src/org").Call();
 			git.Commit().SetMessage("second").Call();
 			WriteTrashFile("src/org/C.java", string.Empty);
 			diff = new IndexDiff(db, Constants.HEAD, new FileTreeIterator(db));
 			diff.Diff();
-			NUnit.Framework.CollectionAssert.AreEquivalent(new HashSet<string>(Arrays.AsList("src/org", "src/tst"
+			CollectionAssert.AreEquivalent(new HashSet<string>(Arrays.AsList("src/org", "src/tst"
 				, "target")), diff.GetUntrackedFolders());
 		}
 
 		/// <exception cref="System.Exception"></exception>
-		[NUnit.Framework.Test]
+		[Test]
 		public virtual void TestAssumeUnchanged()
 		{
 			Git git = new Git(db);
@@ -482,21 +485,21 @@ namespace NGit
 			FileTreeIterator iterator = new FileTreeIterator(db);
 			IndexDiff diff = new IndexDiff(db, Constants.HEAD, iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(1, diff.GetAssumeUnchanged().Count);
-			NUnit.Framework.Assert.AreEqual(1, diff.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetChanged().Count);
-			NUnit.Framework.Assert.IsTrue(diff.GetAssumeUnchanged().Contains("file2"));
-			NUnit.Framework.Assert.IsTrue(diff.GetModified().Contains("file"));
+			Assert.AreEqual(1, diff.GetAssumeUnchanged().Count);
+			Assert.AreEqual(1, diff.GetModified().Count);
+			Assert.AreEqual(0, diff.GetChanged().Count);
+			Assert.IsTrue(diff.GetAssumeUnchanged().Contains("file2"));
+			Assert.IsTrue(diff.GetModified().Contains("file"));
 			git.Add().AddFilepattern(".").Call();
 			iterator = new FileTreeIterator(db);
 			diff = new IndexDiff(db, Constants.HEAD, iterator);
 			diff.Diff();
-			NUnit.Framework.Assert.AreEqual(1, diff.GetAssumeUnchanged().Count);
-			NUnit.Framework.Assert.AreEqual(0, diff.GetModified().Count);
-			NUnit.Framework.Assert.AreEqual(1, diff.GetChanged().Count);
-			NUnit.Framework.Assert.IsTrue(diff.GetAssumeUnchanged().Contains("file2"));
-			NUnit.Framework.Assert.IsTrue(diff.GetChanged().Contains("file"));
-			NUnit.Framework.Assert.AreEqual(Sharpen.Collections<string>.EMPTY_SET, diff.GetUntrackedFolders
+			Assert.AreEqual(1, diff.GetAssumeUnchanged().Count);
+			Assert.AreEqual(0, diff.GetModified().Count);
+			Assert.AreEqual(1, diff.GetChanged().Count);
+			Assert.IsTrue(diff.GetAssumeUnchanged().Contains("file2"));
+			Assert.IsTrue(diff.GetChanged().Contains("file"));
+			Assert.AreEqual(Sharpen.Collections<string>.EMPTY_SET, diff.GetUntrackedFolders
 				());
 		}
 

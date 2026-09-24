@@ -45,6 +45,7 @@ using NGit;
 using NGit.Junit;
 using NGit.Storage.Pack;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 using Sharpen;
 
 namespace NGit.Storage.Pack

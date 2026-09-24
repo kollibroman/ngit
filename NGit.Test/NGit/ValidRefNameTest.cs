@@ -43,6 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using NGit;
 using NGit.Junit;
+using NUnit.Framework;
 using Sharpen;
 
 namespace NGit
